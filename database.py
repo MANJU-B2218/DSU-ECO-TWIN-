@@ -144,21 +144,21 @@ def init_db() -> None:
 
 
 def _seed_digital_twin_data(conn: sqlite3.Connection) -> None:
-    """Seed initial realistic smart bins and collection fleet for the digital twin demo."""
+    """Seed realistic IoT smart bins and collection fleet across Dayananda Sagar University (DSU) Harohalli Campus."""
     cursor = conn.cursor()
 
     # Check if bins exist
     cursor.execute("SELECT COUNT(*) AS count FROM smart_bins")
     if cursor.fetchone()["count"] == 0:
         initial_bins = [
-            ("BIN-101", "MG Road Central Plaza", "Central Commercial", 12.9756, 77.6080, 88, 410, 42.5, 94, "Critical"),
-            ("BIN-102", "Indiranagar 100ft Road", "East Sector", 12.9784, 77.6408, 65, 230, 28.0, 89, "Moderate"),
-            ("BIN-103", "Koramangala 4th Block", "South Zone", 12.9344, 77.6292, 42, 160, 16.4, 98, "Normal"),
-            ("BIN-104", "Brigade Road Crossing", "Central Commercial", 12.9719, 77.6070, 92, 520, 48.2, 85, "Critical"),
-            ("BIN-105", "Whitefield IT Park", "Tech Corridor", 12.9856, 77.7289, 74, 280, 34.1, 91, "Moderate"),
-            ("BIN-106", "Jayanagar 4th Block Market", "South Residential", 12.9298, 77.5834, 35, 140, 12.8, 96, "Normal"),
-            ("BIN-107", "Malleshwaram 8th Cross", "North Heritage", 12.9984, 77.5709, 82, 380, 39.0, 88, "Critical"),
-            ("BIN-108", "Cubbon Park Green Pavilion", "Civic Zone", 12.9763, 77.5929, 22, 95, 8.2, 100, "Normal"),
+            ("DSU-BIN-01", "School of Engineering (SOE) Quadrangle", "SOE Academic Block", 12.6608, 77.4503, 38, 110, 16.5, 96, "Normal"),
+            ("DSU-BIN-02", "Central Student Food Court & Cafeteria", "Student Amenities Hub", 12.6598, 77.4516, 88, 410, 48.0, 89, "Critical"),
+            ("DSU-BIN-03", "School of Health Sciences & Nursing", "Medical Campus", 12.6618, 77.4496, 42, 135, 19.2, 94, "Normal"),
+            ("DSU-BIN-04", "Hostel Quadrangle (Blocks A & B)", "Residential Zone", 12.6582, 77.4526, 76, 280, 37.5, 91, "Moderate"),
+            ("DSU-BIN-05", "Innovation & Robotics Incubation Lab", "Research & Tech Wing", 12.6612, 77.4519, 25, 90, 9.8, 98, "Normal"),
+            ("DSU-BIN-06", "DSU Central Library & Admin Tower", "Academic Zone", 12.6592, 77.4494, 60, 190, 24.0, 92, "Moderate"),
+            ("DSU-BIN-07", "Campus Sports Complex & Arena", "Athletic Grounds", 12.6575, 77.4488, 84, 340, 42.0, 86, "Critical"),
+            ("DSU-BIN-08", "DSU Main Campus Gate (Kanakapura Rd)", "Campus Entrance & Transit", 12.6586, 77.4468, 48, 150, 21.5, 95, "Normal"),
         ]
         cursor.executemany(
             """
@@ -172,9 +172,9 @@ def _seed_digital_twin_data(conn: sqlite3.Connection) -> None:
     cursor.execute("SELECT COUNT(*) AS count FROM collection_trucks")
     if cursor.fetchone()["count"] == 0:
         initial_trucks = [
-            ("TRK-01", "Ramesh Kumar", 12.9730, 77.6050, "En Route", 2500.0, 1450.0, json.dumps(["BIN-104", "BIN-101"])),
-            ("TRK-02", "Suresh Gowda", 12.9810, 77.6350, "Active", 2500.0, 820.0, json.dumps(["BIN-107", "BIN-105"])),
-            ("TRK-03", "Anil Patil", 12.9320, 77.5900, "Idle", 2000.0, 0.0, "[]"),
+            ("DSU-EV-01", "Basavaraju (Electric Buggy)", 12.6596, 77.4510, "Active", 1200.0, 680.0, json.dumps(["DSU-BIN-02", "DSU-BIN-04"])),
+            ("DSU-EV-02", "Manjunath (Campus Utility EV)", 12.6605, 77.4500, "On Route", 1500.0, 420.0, json.dumps(["DSU-BIN-07", "DSU-BIN-01"])),
+            ("DSU-TRK-03", "Harohalli Municipal Liaison Truck", 12.6585, 77.4465, "Standby", 3000.0, 0.0, "[]"),
         ]
         cursor.executemany(
             """
@@ -185,6 +185,21 @@ def _seed_digital_twin_data(conn: sqlite3.Connection) -> None:
         )
 
     conn.commit()
+
+
+def reset_dsu_campus_database() -> None:
+    """Fresh start: Clear all dummy reviews, scans, reports, and reset smart bins/trucks to DSU Harohalli Campus."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM scans")
+        cursor.execute("DELETE FROM reviews")
+        cursor.execute("DELETE FROM waste_reports")
+        cursor.execute("DELETE FROM iot_telemetry")
+        cursor.execute("DELETE FROM smart_bins")
+        cursor.execute("DELETE FROM collection_trucks")
+        conn.commit()
+        _seed_digital_twin_data(conn)
+        print("[SUCCESS] Database reset: reviews, scans, reports cleared. DSU Harohalli Campus digital twin seeded.")
 
 
 # ============================================================================

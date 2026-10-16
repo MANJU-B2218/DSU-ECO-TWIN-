@@ -143,15 +143,15 @@ class DigitalTwinEngine:
         }
 
     @staticmethod
-    def optimize_collection_route(truck_code: str = "TRK-01") -> Dict[str, Any]:
-        """Compute the shortest Traveling Salesperson (TSP) route for full bins (>70% fill or high gas)."""
+    def optimize_collection_route(truck_code: str = "DSU-EV-01") -> Dict[str, Any]:
+        """Compute the shortest Traveling Salesperson (TSP) route for full bins across DSU Harohalli campus."""
         bins = get_all_smart_bins()
         trucks = get_collection_trucks()
 
         # Find requested truck or default
         truck = next((t for t in trucks if t["truck_code"] == truck_code), trucks[0] if trucks else None)
-        truck_lat = truck["lat"] if truck else 12.9730
-        truck_lon = truck["lon"] if truck else 77.6050
+        truck_lat = truck["lat"] if truck else 12.6596
+        truck_lon = truck["lon"] if truck else 77.4510
 
         # Select only priority bins: fill >= 70 or gas >= 350
         priority_bins = [b for b in bins if b["fill_level"] >= 70 or b["gas_ppm"] >= 350]
@@ -200,8 +200,8 @@ class DigitalTwinEngine:
         polyline_coords = [[truck_lat, truck_lon]] + [[s["lat"], s["lon"]] for s in ordered_route]
 
         return {
-            "truck_code": truck["truck_code"] if truck else "TRK-01",
-            "driver_name": truck["driver_name"] if truck else "Ramesh Kumar",
+            "truck_code": truck["truck_code"] if truck else "DSU-EV-01",
+            "driver_name": truck["driver_name"] if truck else "Basavaraju (DSU Campus EV Driver)",
             "start_coordinates": {"lat": truck_lat, "lon": truck_lon},
             "total_stops": len(ordered_route),
             "total_distance_km": round(total_distance_km, 2),

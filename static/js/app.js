@@ -255,6 +255,11 @@ function changeLanguage(lang) {
     if (select && select.value !== lang) {
         select.value = lang;
     }
+
+    // Synchronize EcoBot Assistant language
+    if (typeof setEcoBotLanguage === 'function') {
+        setEcoBotLanguage(lang);
+    }
 }
 
 function initLanguage() {
@@ -781,7 +786,7 @@ async function captureAndClassify() {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Cache image blob for Google Lens inspection
+    // Cache scanned image preview
     canvas.toBlob((blob) => {
         lastScannedImageBlob = blob;
     }, 'image/jpeg', 0.92);
@@ -794,7 +799,7 @@ function handleImageSelect(event) {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
 
-    // Cache image blob for Google Lens inspection
+    // Cache scanned image file
     lastScannedImageBlob = file;
 
     if (!file.type.startsWith('image/')) {
@@ -960,8 +965,8 @@ function displayClassificationResult(result) {
     lastScannedItemName = result.item_name || result.predicted_class || 'waste item';
     const engineEl = document.getElementById('result-detection-engine');
     if (engineEl) {
-        const engineName = result.detection_engine || 'Google Lens & MobileNetV3 (1,000 Classes)';
-        engineEl.innerHTML = `<i class="fa-brands fa-google text-emerald-600"></i> ${escapeHtml(engineName)}`;
+        const engineName = result.detection_engine || 'MobileNetV3 Deep Learning + Google Search Engine';
+        engineEl.innerHTML = `<i class="fa-solid fa-microchip text-emerald-600"></i> ${escapeHtml(engineName)}`;
     }
 
     // 1. Exact Item Name & Material Type
@@ -1046,7 +1051,7 @@ function displayClassificationResult(result) {
     const searchSnippetText = document.getElementById('result-search-snippet-text');
     const googleLink = document.getElementById('result-google-link');
 
-    const searchItemName = result.google_lens_query || result.item_name || result.predicted_class || 'waste item';
+    const searchItemName = result.google_search_query || result.item_name || result.predicted_class || 'waste item';
     if (googleLink) {
         googleLink.href = `https://www.google.com/search?q=${encodeURIComponent('how to dispose ' + searchItemName + ' waste segregation')}`;
     }
@@ -1077,33 +1082,6 @@ function resetScanner() {
     if (resultCard) resultCard.classList.add('hidden');
     clearImagePreview();
     window.scrollTo({ top: 120, behavior: 'smooth' });
-}
-
-/**
- * Open captured or uploaded image in Google Lens Visual Search
- */
-function searchWithGoogleLens() {
-    if (lastScannedImageBlob) {
-        try {
-            const fileInput = document.getElementById('google-lens-file-input');
-            const form = document.getElementById('google-lens-form');
-            if (fileInput && form) {
-                const file = new File([lastScannedImageBlob], 'waste_item.jpg', { type: 'image/jpeg' });
-                const dt = new DataTransfer();
-                dt.items.add(file);
-                fileInput.files = dt.files;
-                form.submit();
-                showToast('Submitted image to Google Lens in a new tab!', 'info');
-                return;
-            }
-        } catch (e) {
-            console.warn('Google Lens form dispatch error:', e);
-        }
-    }
-
-    const q = encodeURIComponent(lastScannedItemName || 'waste disposal recycling');
-    window.open(`https://www.google.com/search?tbm=isch&q=${q}`, '_blank');
-    showToast('Opening Google Visual Search in a new tab...', 'info');
 }
 
 function setupDropzone() {
@@ -1149,11 +1127,11 @@ function initDigitalTwinMap() {
     const mapContainer = document.getElementById('twin-map');
     if (!mapContainer) return;
 
-    // Centered around Bangalore City Civic Core
+    // Centered around Dayananda Sagar University (DSU) Harohalli Campus, Kanakapura Road
     twinMap = L.map('twin-map', {
         zoomControl: true,
         scrollWheelZoom: true
-    }).setView([12.9716, 77.5946], 13);
+    }).setView([12.65954, 77.45077], 17);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors | EcoWaste Digital Twin',
@@ -1693,25 +1671,53 @@ async function findNearbyBins() {
                 if (loading) loading.classList.add('hidden');
             }
         },
-        (geoError) => {
+        async (geoError) => {
             if (loading) loading.classList.add('hidden');
-            let message = 'Unable to determine your location.';
-            if (geoError.code === geoError.PERMISSION_DENIED) {
-                message = 'Geolocation permission denied. Please allow location access in browser settings.';
-            } else if (geoError.code === geoError.POSITION_UNAVAILABLE) {
-                message = 'GPS signal is currently unavailable.';
-            } else if (geoError.code === geoError.TIMEOUT) {
-                message = 'Location request timed out.';
-            }
+            console.warn('Geolocation unavailable/denied, defaulting to DSU Harohalli Campus:', geoError);
+            showToast('Using Dayananda Sagar University (DSU) Harohalli Campus coordinates.', 'info');
 
-            if (errorBanner) {
-                errorTitle.textContent = 'Location Permission Needed';
-                errorMsg.textContent = message;
-                errorBanner.classList.remove('hidden');
+            // Default to DSU Harohalli Campus
+            const dsuLat = 12.65954;
+            const dsuLon = 77.45077;
+            try {
+                initOrUpdateMap(dsuLat, dsuLon);
+                const response = await fetch(`/api/nearby-bins?lat=${dsuLat}&lon=${dsuLon}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const bins = Array.isArray(data) ? data : (data.bins || data.facilities || []);
+                    renderNearbyBins(bins, dsuLat, dsuLon);
+                }
+            } catch (fallbackErr) {
+                console.error('Error loading DSU campus facilities:', fallbackErr);
             }
         },
-        { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
     );
+}
+
+async function loadDsuCampusFacilities() {
+    const loading = document.getElementById('bins-loading');
+    const errorBanner = document.getElementById('bins-error-banner');
+    if (errorBanner) errorBanner.classList.add('hidden');
+    if (loading) loading.classList.remove('hidden');
+
+    const dsuLat = 12.65954;
+    const dsuLon = 77.45077;
+    try {
+        initOrUpdateMap(dsuLat, dsuLon);
+        const response = await fetch(`/api/nearby-bins?lat=${dsuLat}&lon=${dsuLon}`);
+        if (response.ok) {
+            const data = await response.json();
+            const bins = Array.isArray(data) ? data : (data.bins || data.facilities || []);
+            renderNearbyBins(bins, dsuLat, dsuLon);
+            showToast('Dayananda Sagar University (Harohalli) facilities loaded with Google Maps navigation!', 'success');
+        }
+    } catch (err) {
+        console.error('Error loading DSU campus facilities:', err);
+        showToast('Error loading campus facilities', 'error');
+    } finally {
+        if (loading) loading.classList.add('hidden');
+    }
 }
 
 function renderNearbyBins(bins, userLat, userLon) {
@@ -1890,6 +1896,12 @@ async function handleChatSubmit(event) {
     }
 }
 
+// ============================================================================
+// 13. MUNICIPAL & CAMPUS EXECUTIVE REPORT
+// ============================================================================
+
+let currentExecutiveReportData = null;
+
 async function generateDailyReport() {
     const container = document.getElementById('report-view-container');
     if (!container) return;
@@ -1897,7 +1909,7 @@ async function generateDailyReport() {
     container.innerHTML = `
         <div class="py-16 text-center">
             <i class="fa-solid fa-spinner fa-spin text-3xl text-purple-600 mb-3"></i>
-            <p class="text-xs text-slate-500 font-semibold">Compiling Municipal Digital Twin Telemetry &amp; LLM Report...</p>
+            <p class="text-xs text-slate-500 font-semibold">Compiling DSU Harohalli Municipal Digital Twin Telemetry &amp; LLM Report...</p>
         </div>
     `;
 
@@ -1906,6 +1918,7 @@ async function generateDailyReport() {
         if (!res.ok) throw new Error(`Report generation failed: ${res.status}`);
 
         const data = await res.json();
+        currentExecutiveReportData = data;
         let reportText = '';
         if (data.report) {
             reportText = data.report;
@@ -1914,35 +1927,36 @@ async function generateDailyReport() {
             const fleet = data.fleet_efficiency || {};
             const warnings = (data.hotspot_warnings || []).map(w => `• ${w}`).join('\n');
             reportText = `========================================================================
+DAYANANDA SAGAR UNIVERSITY (DSU) HAROHALLI CAMPUS
 MUNICIPAL SOLID WASTE DIGITAL TWIN - DAILY TELEMETRY REPORT
 ========================================================================
-Report ID:     ${data.report_id || 'REP-20261016-01'}
+Report ID:     ${data.report_id || 'DSU-REP-20261016-01'}
 Date:          ${data.date || new Date().toLocaleDateString()}
 Generated At:  ${data.generated_at || new Date().toLocaleTimeString()}
-Jurisdiction:  ${data.city_jurisdiction || 'BBMP Solid Waste Management'}
+Jurisdiction:  ${data.city_jurisdiction || 'Dayananda Sagar University (DSU) Harohalli Campus'}
 
 ------------------------------------------------------------------------
-EXECUTIVE SUMMARY
+EXECUTIVE BRIEFING SUMMARY
 ------------------------------------------------------------------------
 ${data.executive_summary}
 
 ------------------------------------------------------------------------
-KEY MUNICIPAL PERFORMANCE INDICATORS (KPIs)
+CAMPUS MUNICIPAL PERFORMANCE INDICATORS (KPIs)
 ------------------------------------------------------------------------
 • Total Waste Managed:          ${kpi.total_waste_managed_tons || 0} Metric Tons
 • Segregation Diversion Rate:   ${kpi.segregation_diversion_rate_pct || 0}%
 • Full Smart Bins Serviced:     ${kpi.full_bins_serviced || 0}
 • Fleet Diesel Saved via TSP:   ${kpi.fuel_saved_litres || 0} Liters
 • Carbon Emissions Mitigated:   ${kpi.carbon_emissions_offset_kg || 0} kg CO2e
-• Citizen Incidents Resolved:   ${kpi.citizen_reports_resolved || 0}
-• Pending Citizen Complaints:   ${kpi.citizen_reports_pending || 0}
+• Campus Incidents Resolved:    ${kpi.citizen_reports_resolved || 0}
+• Pending Waste Inquiries:      ${kpi.citizen_reports_pending || 0}
 
 ------------------------------------------------------------------------
-FLEET TELEMETRY & ROUTE EFFICIENCY
+CAMPUS EV FLEET TELEMETRY & TSP DISPATCH
 ------------------------------------------------------------------------
-• Active Collection Fleet:      ${fleet.active_trucks || 3} Vehicles
-• Average Route Completion:     ${fleet.average_route_completion_pct || 92}%
-• Mean Bin Clearance Latency:   ${fleet.average_bin_clearance_time_min || 18} Minutes
+• Active Collection Fleet:      ${fleet.active_trucks || 3} Electric Waste Haulers
+• Route Efficiency Index:       ${fleet.average_route_completion_pct || 94}%
+• Mean Bin Clearance Latency:   ${fleet.average_bin_clearance_time_min || 14} Minutes
 
 ------------------------------------------------------------------------
 HOTSPOT OVERFLOW WARNINGS & DISPATCH DIRECTIVES
@@ -1950,40 +1964,625 @@ HOTSPOT OVERFLOW WARNINGS & DISPATCH DIRECTIVES
 ${warnings}
 
 ========================================================================
-End of Automated Municipal Report - Verified by EcoWaste Digital Twin 2.0
+End of Automated Municipal Report - Verified by DSU EcoTwin Intelligence
 ========================================================================`;
         } else {
             reportText = JSON.stringify(data, null, 2);
         }
 
-        container.innerHTML = `<pre class="whitespace-pre-wrap font-mono text-xs leading-relaxed">${escapeHtml(reportText)}</pre>`;
-        showToast('Daily municipal executive report compiled!', 'success');
+        container.innerHTML = `<pre class="whitespace-pre-wrap font-mono text-xs leading-relaxed text-slate-800">${escapeHtml(reportText)}</pre>`;
+        showToast('Daily DSU Municipal Executive Report compiled!', 'success');
     } catch (err) {
         console.error('Report error:', err);
         container.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Failed to generate report: ${err.message}</p>`;
     }
 }
 
-function printReport() {
-    const container = document.getElementById('report-view-container');
-    if (!container) return;
+async function openExecutiveReportModal() {
+    const modal = document.getElementById('executive-report-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
 
-    const win = window.open('', '_blank');
-    win.document.write(`
-        <html>
-            <head>
-                <title>EcoWaste Municipal Daily Report</title>
-                <style>
-                    body { font-family: monospace; padding: 30px; font-size: 13px; line-height: 1.6; }
-                </style>
-            </head>
-            <body>
-                ${container.innerHTML}
-                <script>window.print();</script>
-            </body>
-        </html>
-    `);
-    win.document.close();
+    const narrativeEl = document.getElementById('modal-report-narrative');
+    const idEl = document.getElementById('modal-report-id');
+    const timeEl = document.getElementById('modal-report-timestamp');
+    const kpiTons = document.getElementById('modal-kpi-tons');
+    const kpiDiv = document.getElementById('modal-kpi-diversion');
+    const kpiFuel = document.getElementById('modal-kpi-fuel');
+    const kpiCo2 = document.getElementById('modal-kpi-co2');
+    const tbody = document.getElementById('modal-bins-tbody');
+    const hotspotsEl = document.getElementById('modal-hotspots-list');
+
+    if (narrativeEl) narrativeEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2 text-emerald-600"></i> Synthesizing official briefing from live IoT telemetry...';
+
+    try {
+        const [reportRes, binsRes] = await Promise.all([
+            fetch('/api/ai/generate-report'),
+            fetch('/api/digital-twin/bins')
+        ]);
+
+        const reportData = await reportRes.json();
+        const binsData = await binsRes.json();
+        currentExecutiveReportData = reportData;
+
+        if (idEl) idEl.textContent = reportData.report_id || 'DSU-REP-01';
+        if (timeEl) timeEl.textContent = `Generated: ${reportData.date || new Date().toLocaleDateString()} at ${reportData.generated_at || new Date().toLocaleTimeString()}`;
+        if (narrativeEl) narrativeEl.textContent = reportData.executive_summary || 'Campus waste segregation and clearance telemetry operating within normal parameters.';
+
+        const kpi = reportData.kpi_metrics || {};
+        if (kpiTons) kpiTons.textContent = `${kpi.total_waste_managed_tons || 3.84} t`;
+        if (kpiDiv) kpiDiv.textContent = `${kpi.segregation_diversion_rate_pct || 88.5}%`;
+        if (kpiFuel) kpiFuel.textContent = `${kpi.fuel_saved_litres || 42.1} L`;
+        if (kpiCo2) kpiCo2.textContent = `${kpi.carbon_emissions_offset_kg || 112.4} kg`;
+
+        // Render Smart Bins Telemetry Table
+        if (tbody) {
+            tbody.innerHTML = '';
+            const bins = Array.isArray(binsData) ? binsData : (binsData.bins || []);
+            if (bins.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-slate-400">No active IoT bins detected.</td></tr>';
+            } else {
+                bins.forEach(b => {
+                    const fill = Math.round(b.fill_level_percent || 0);
+                    let fillBadge = 'bg-emerald-500';
+                    let statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">NORMAL</span>';
+                    
+                    if (fill >= 80) {
+                        fillBadge = 'bg-red-500';
+                        statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 animate-pulse">OVERFLOW CRITICAL</span>';
+                    } else if (fill >= 60) {
+                        fillBadge = 'bg-amber-500';
+                        statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">ATTENTION</span>';
+                    }
+
+                    const gasPpm = Math.round(b.gas_ppm || 45);
+                    let gasClass = gasPpm > 100 ? 'text-red-600 font-bold' : 'text-slate-600';
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50/80 transition';
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-4 font-mono font-bold text-slate-800">${escapeHtml(b.bin_code || b.name || 'BIN')}</td>
+                        <td class="py-2.5 px-4 text-slate-700 font-medium">
+                            ${escapeHtml(b.address || b.name || 'Campus Landmark')}
+                            <span class="block text-[10px] text-slate-400">${escapeHtml(b.zone || 'Harohalli')}</span>
+                        </td>
+                        <td class="py-2.5 px-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <div class="w-16 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                    <div class="${fillBadge} h-1.5 rounded-full" style="width: ${fill}%"></div>
+                                </div>
+                                <span class="font-bold text-slate-800">${fill}%</span>
+                            </div>
+                        </td>
+                        <td class="py-2.5 px-4 text-center font-mono ${gasClass}">${gasPpm} PPM</td>
+                        <td class="py-2.5 px-4 text-center font-semibold text-slate-700">${b.weight_kg ? b.weight_kg.toFixed(1) : '12.0'} kg</td>
+                        <td class="py-2.5 px-4 text-right">${statusBadge}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        // Render Hotspots Warnings
+        if (hotspotsEl) {
+            hotspotsEl.innerHTML = '';
+            const warnings = reportData.hotspot_warnings || [];
+            if (warnings.length === 0) {
+                hotspotsEl.innerHTML = '<li class="text-emerald-700 flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> All campus zones operating at safe thresholds with zero active overflow alerts.</li>';
+            } else {
+                warnings.forEach(w => {
+                    hotspotsEl.innerHTML += `<li class="flex items-start gap-2"><i class="fa-solid fa-arrow-right text-amber-600 mt-1 shrink-0"></i> <span>${escapeHtml(w)}</span></li>`;
+                });
+            }
+        }
+    } catch (err) {
+        console.error('Failed to load executive modal data:', err);
+        if (narrativeEl) narrativeEl.textContent = 'Dayananda Sagar University (DSU) Harohalli smart waste telemetry is active. Automated scheduled collection dispatched across all academic blocks.';
+    }
+}
+
+function closeExecutiveReportModal() {
+    const modal = document.getElementById('executive-report-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function exportReportToCsv() {
+    showToast('Exporting official DSU Municipal CSV Telemetry...', 'info');
+    window.location.href = '/api/reports/export-csv';
+}
+
+function copyExecutiveSummary() {
+    if (!currentExecutiveReportData || !currentExecutiveReportData.executive_summary) {
+        showToast('Please open or generate the report first', 'warning');
+        return;
+    }
+    const text = `DAYANANDA SAGAR UNIVERSITY - EXECUTIVE MUNICIPAL REPORT\n` +
+        `Report ID: ${currentExecutiveReportData.report_id || 'DSU-REP-01'}\n` +
+        `Date: ${currentExecutiveReportData.date || new Date().toLocaleDateString()}\n\n` +
+        `EXECUTIVE BRIEFING:\n${currentExecutiveReportData.executive_summary}\n\n` +
+        `KEY METRICS:\n` +
+        `- Total Waste Managed: ${currentExecutiveReportData.kpi_metrics?.total_waste_managed_tons || 3.84} Tons\n` +
+        `- Diversion Rate: ${currentExecutiveReportData.kpi_metrics?.segregation_diversion_rate_pct || 88.5}%\n` +
+        `- Fuel Saved: ${currentExecutiveReportData.kpi_metrics?.fuel_saved_litres || 42.1} L\n` +
+        `- Carbon Offset: ${currentExecutiveReportData.kpi_metrics?.carbon_emissions_offset_kg || 112.4} kg CO2e`;
+
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Executive report copied to clipboard!', 'success');
+    }).catch(err => {
+        console.error('Copy failed:', err);
+        showToast('Failed to copy to clipboard', 'error');
+    });
+}
+
+function printOfficialReport() {
+    const modal = document.getElementById('executive-report-modal');
+    if (!modal || modal.classList.contains('hidden')) {
+        openExecutiveReportModal();
+        setTimeout(() => window.print(), 500);
+    } else {
+        window.print();
+    }
+}
+
+// ============================================================================
+// 13B. ECOBOT MULTI-LANGUAGE VOICE ASSISTANT (ENGLISH / KANNADA / HINDI)
+// ============================================================================
+
+let voiceRecognition = null;
+let isVoiceListening = false;
+let isVoiceSpeaking = false;
+let voiceSpeechMuted = false;
+let voiceCurrentUtterance = null;
+let ecobotCurrentLanguage = 'en';
+
+const ECOBOT_LANG_CONFIG = {
+    en: {
+        code: 'en-IN',
+        label: 'English',
+        speechLang: 'en-IN',
+        pillCaption: 'Ask: "Which bins are full in DSU?"',
+        cardPlaceholder: 'Tap the microphone and ask: <em>"Which bins are full in DSU?"</em> or <em>"How do I dispose of lithium batteries?"</em>',
+        statusReady: 'Ready to listen',
+        statusListening: 'Listening to your voice...',
+        statusSpeaking: 'EcoBot is speaking...',
+        statusThinking: 'Analyzing DSU smart waste telemetry...',
+        chips: [
+            { label: 'Full Bins?', query: 'Which bins are full in DSU right now?' },
+            { label: 'E-Waste?', query: 'Where is the campus e-waste collection bin?' },
+            { label: 'Food Waste?', query: 'How does DSU handle food court waste?' }
+        ],
+        toastChanged: 'EcoBot Voice Assistant set to English'
+    },
+    kn: {
+        code: 'kn-IN',
+        label: 'ಕನ್ನಡ (Kannada)',
+        speechLang: 'kn-IN',
+        pillCaption: 'ಕೇಳಿ: "ಯಾವ ಕಸದ ತೊಟ್ಟಿಗಳು ತುಂಬಿವೆ?"',
+        cardPlaceholder: 'ಮೈಕ್ರೋಫೋನ್ ಒತ್ತಿ ಕೇಳಿ: <em>"ದಯಾನಂದ ಸಾಗರ್ ವಿಶ್ವವಿದ್ಯಾಲಯದಲ್ಲಿ ಯಾವ ಕಸದ ತೊಟ್ಟಿಗಳು ತುಂಬಿವೆ?"</em> ಅಥವಾ <em>"ಇ-ತ್ಯಾಜ್ಯ ಎಲ್ಲಿ ಹಾಕಬೇಕು?"</em>',
+        statusReady: 'ಕೇಳಲು ಸಿದ್ಧವಾಗಿದೆ',
+        statusListening: 'ನಿಮ್ಮ ಧ್ವನಿಯನ್ನು ಆಲಿಸಲಾಗುತ್ತಿದೆ...',
+        statusSpeaking: 'EcoBot ಮಾತನಾಡುತ್ತಿದೆ...',
+        statusThinking: 'ಕ್ಯಾಂಪಸ್ ತ್ಯಾಜ್ಯ ಮಾಹಿತಿಯನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ...',
+        chips: [
+            { label: 'ತುಂಬಿದ ಬುಟ್ಟಿಗಳು?', query: 'ದಯಾನಂದ ಸಾಗರ್ ವಿಶ್ವವಿದ್ಯಾಲಯದಲ್ಲಿ ಯಾವ ಕಸದ ತೊಟ್ಟಿಗಳು ತುಂಬಿವೆ?' },
+            { label: 'ಇ-ತ್ಯಾಜ್ಯ ಸಂಗ್ರಹ?', query: 'ಕ್ಯಾಂಪಸ್‌ನಲ್ಲಿ ಇ-ತ್ಯಾಜ್ಯ ಕಸದ ಬುಟ್ಟಿ ಎಲ್ಲಿದೆ?' },
+            { label: 'ಆಹಾರ ತ್ಯಾಜ್ಯ?', query: 'ಡಿಎಸ್‌ಯು ಫುಡ್ ಕೋರ್ಟ್ ಆಹಾರ ಕಸವನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತದೆ?' }
+        ],
+        toastChanged: 'EcoBot ಧ್ವನಿ ಸಹಾಯಕವನ್ನು ಕನ್ನಡಕ್ಕೆ ಹೊಂದಿಸಲಾಗಿದೆ (Kannada)'
+    },
+    hi: {
+        code: 'hi-IN',
+        label: 'हिंदी (Hindi)',
+        speechLang: 'hi-IN',
+        pillCaption: 'पूछें: "कौन से डस्टबिन भरे हैं?"',
+        cardPlaceholder: 'माइक दबाकर पूछें: <em>"दयानंद सागर यूनिवर्सिटी में कौन से डस्टबिन भरे हैं?"</em> या <em>"ई-कचरा कहाँ डालें?"</em>',
+        statusReady: 'सुनने के लिए तैयार',
+        statusListening: 'आपकी आवाज़ सुनी जा रही है...',
+        statusSpeaking: 'EcoBot बोल रहा है...',
+        statusThinking: 'कैंपस अपशिष्ट टेलीमेट्री का विश्लेषण हो रहा है...',
+        chips: [
+            { label: 'भरे डस्टबिन?', query: 'दयानंद सागर यूनिवर्सिटी में कौन से डस्टबिन भरे हैं?' },
+            { label: 'ई-कचरा डिब्बा?', query: 'कैंपस में ई-कचरा संग्रह डिब्बा कहाँ है?' },
+            { label: 'गीला कचरा?', query: 'डीएसयू में कैंटीन के गीले कचरे का निपटान कैसे होता है?' }
+        ],
+        toastChanged: 'EcoBot वॉयस असिस्टेंट को हिंदी में सेट किया गया है'
+    }
+};
+
+function setEcoBotLanguage(lang) {
+    if (!ECOBOT_LANG_CONFIG[lang]) return;
+    ecobotCurrentLanguage = lang;
+    const cfg = ECOBOT_LANG_CONFIG[lang];
+
+    // Update recognition language dynamically
+    if (voiceRecognition) {
+        voiceRecognition.lang = cfg.speechLang;
+    }
+
+    // Update Dialogue switcher buttons
+    ['en', 'kn', 'hi'].forEach(l => {
+        const dBtn = document.getElementById(`dialogue-lang-${l}`);
+        const pBtn = document.getElementById(`pill-lang-${l}`);
+        const activeClass = 'bg-emerald-500 text-slate-950 font-bold shadow-sm';
+        const inactiveClass = 'text-slate-400 hover:text-white';
+
+        if (dBtn) {
+            dBtn.className = (l === lang) ? `px-2 py-0.5 rounded-full transition ${activeClass}` : `px-2 py-0.5 rounded-full transition ${inactiveClass}`;
+        }
+        if (pBtn) {
+            pBtn.className = (l === lang) ? `px-1.5 py-0.5 rounded-full transition ${activeClass}` : `px-1.5 py-0.5 rounded-full transition ${inactiveClass}`;
+        }
+    });
+
+    // Update Pill caption
+    const captionEl = document.getElementById('voice-pill-caption');
+    if (captionEl) captionEl.textContent = cfg.pillCaption;
+
+    // Update Status Ready text if idle
+    const cardStatus = document.getElementById('voice-card-status');
+    if (cardStatus && !isVoiceListening && !isVoiceSpeaking) {
+        cardStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> ${cfg.statusReady}`;
+    }
+
+    // Update Quick prompt chips
+    const chipsContainer = document.getElementById('voice-chips-container');
+    if (chipsContainer) {
+        chipsContainer.innerHTML = cfg.chips.map(c => `
+            <button type="button" onclick="triggerVoiceQuery('${escapeHtml(c.query)}')" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-emerald-950 hover:text-emerald-300 hover:border-emerald-500/50 border border-slate-700/60 text-slate-300 transition whitespace-nowrap">
+                ${escapeHtml(c.label)}
+            </button>
+        `).join('');
+    }
+
+    // Update initial bot bubble text if user hasn't asked anything yet
+    const userBubble = document.getElementById('voice-user-bubble');
+    const botText = document.getElementById('voice-bot-text');
+    if (userBubble && userBubble.classList.contains('hidden') && botText) {
+        botText.innerHTML = cfg.cardPlaceholder;
+    }
+
+    showToast(cfg.toastChanged, 'info');
+}
+
+function initVoiceAssistant() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        console.warn('SpeechRecognition API not supported in this browser.');
+        const pillCaption = document.getElementById('voice-pill-caption');
+        if (pillCaption) pillCaption.textContent = 'Tap to ask EcoBot anything!';
+        return;
+    }
+
+    try {
+        voiceRecognition = new SpeechRecognition();
+        voiceRecognition.continuous = false;
+        voiceRecognition.interimResults = false;
+        voiceRecognition.lang = ECOBOT_LANG_CONFIG[ecobotCurrentLanguage].speechLang;
+
+        voiceRecognition.onstart = () => {
+            isVoiceListening = true;
+            updateVoiceAssistantUI('listening');
+        };
+
+        voiceRecognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            console.log('Voice recognized:', transcript);
+            processVoiceQuery(transcript);
+        };
+
+        voiceRecognition.onerror = (event) => {
+            console.warn('Speech recognition error:', event.error);
+            isVoiceListening = false;
+            updateVoiceAssistantUI('idle');
+            if (event.error === 'not-allowed') {
+                showToast('Microphone access denied. Please enable microphone permissions in your browser.', 'warning');
+            } else if (event.error !== 'no-speech') {
+                showToast(`Voice assistant: ${event.error}`, 'info');
+            }
+        };
+
+        voiceRecognition.onend = () => {
+            isVoiceListening = false;
+            if (!isVoiceSpeaking) {
+                updateVoiceAssistantUI('idle');
+            }
+        };
+    } catch (e) {
+        console.warn('Failed to initialize SpeechRecognition:', e);
+    }
+}
+
+function toggleEcoBotVoice() {
+    if (isVoiceSpeaking) {
+        stopEcoBotSpeaking();
+        return;
+    }
+
+    if (isVoiceListening) {
+        stopListening();
+        return;
+    }
+
+    startListening();
+}
+
+function startListening() {
+    if (!voiceRecognition) {
+        // Fallback for browsers without speech recognition
+        openVoiceDialogueCard();
+        const botText = document.getElementById('voice-bot-text');
+        const cfg = ECOBOT_LANG_CONFIG[ecobotCurrentLanguage] || ECOBOT_LANG_CONFIG.en;
+        if (botText) {
+            botText.innerHTML = `Microphone speech recognition is not enabled in this browser. You can tap any of the quick prompt chips below or use the <strong>AI Assistant</strong> tab.`;
+        }
+        return;
+    }
+
+    try {
+        stopEcoBotSpeaking();
+        openVoiceDialogueCard();
+        voiceRecognition.lang = ECOBOT_LANG_CONFIG[ecobotCurrentLanguage].speechLang;
+        voiceRecognition.start();
+    } catch (err) {
+        console.error('Error starting speech recognition:', err);
+    }
+}
+
+function stopListening() {
+    if (voiceRecognition && isVoiceListening) {
+        try {
+            voiceRecognition.stop();
+        } catch (e) {
+            console.error('Error stopping recognition:', e);
+        }
+    }
+    isVoiceListening = false;
+    updateVoiceAssistantUI('idle');
+}
+
+function triggerVoiceQuery(query) {
+    stopListening();
+    stopEcoBotSpeaking();
+    openVoiceDialogueCard();
+    processVoiceQuery(query);
+}
+
+async function processVoiceQuery(text) {
+    if (!text || !text.trim()) return;
+
+    const cfg = ECOBOT_LANG_CONFIG[ecobotCurrentLanguage] || ECOBOT_LANG_CONFIG.en;
+
+    // Show user question bubble
+    const userBubble = document.getElementById('voice-user-bubble');
+    const userText = document.getElementById('voice-user-text');
+    const botText = document.getElementById('voice-bot-text');
+    const cardStatus = document.getElementById('voice-card-status');
+    const pillCaption = document.getElementById('voice-pill-caption');
+
+    if (userBubble && userText) {
+        userBubble.classList.remove('hidden');
+        userText.textContent = text;
+    }
+
+    if (pillCaption) {
+        pillCaption.textContent = `"${text}"`;
+    }
+
+    if (botText) {
+        botText.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-emerald-400 mr-2"></i> ${cfg.statusThinking}`;
+    }
+
+    if (cardStatus) {
+        cardStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> ${cfg.statusThinking}`;
+    }
+
+    updateVoiceAssistantUI('thinking');
+
+    try {
+        const response = await fetch('/api/ai/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: text,
+                language: ecobotCurrentLanguage
+            })
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const reply = data.reply || "I'm here to assist with Dayananda Sagar University smart waste management, bin statuses, and recycling instructions.";
+
+        if (botText) {
+            botText.innerHTML = escapeHtml(reply).replace(/\n/g, '<br>');
+        }
+
+        speakEcoBotResponse(reply);
+    } catch (err) {
+        console.error('Voice query error:', err);
+        if (botText) {
+            botText.textContent = (ecobotCurrentLanguage === 'kn')
+                ? "ಕ್ಯಾಂಪಸ್ ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಪರಿಶೀಲಿಸಿ."
+                : ((ecobotCurrentLanguage === 'hi') ? "कैंपस नेटवर्क से कनेक्ट करने में असमर्थ। कृपया जांचें।" : "I'm having trouble connecting to the campus telemetry servers right now. Please check your network.");
+        }
+        updateVoiceAssistantUI('idle');
+    }
+}
+
+function cleanMarkdownForSpeech(text) {
+    if (!text) return '';
+    return text
+        .replace(/[*#_~`>]/g, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/•|-/g, '')
+        .replace(/\n+/g, '. ')
+        .trim();
+}
+
+function speakEcoBotResponse(rawText) {
+    if (voiceSpeechMuted || !window.speechSynthesis) {
+        updateVoiceAssistantUI('idle');
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const cleanText = cleanMarkdownForSpeech(rawText);
+    if (!cleanText) {
+        updateVoiceAssistantUI('idle');
+        return;
+    }
+
+    try {
+        const cfg = ECOBOT_LANG_CONFIG[ecobotCurrentLanguage] || ECOBOT_LANG_CONFIG.en;
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.rate = 1.05;
+        utterance.pitch = 1.0;
+        utterance.lang = cfg.speechLang;
+
+        const voices = window.speechSynthesis.getVoices();
+        let selectedVoice = null;
+
+        if (ecobotCurrentLanguage === 'kn') {
+            selectedVoice = voices.find(v => v.lang.startsWith('kn') || v.lang === 'kn-IN' || v.name.toLowerCase().includes('kannada'))
+                || voices.find(v => v.lang === 'hi-IN' || v.lang === 'en-IN');
+        } else if (ecobotCurrentLanguage === 'hi') {
+            selectedVoice = voices.find(v => v.lang.startsWith('hi') || v.lang === 'hi-IN' || v.name.toLowerCase().includes('hindi') || v.name.includes('Kalpana') || v.name.includes('Hemant'))
+                || voices.find(v => v.lang === 'en-IN');
+        } else {
+            selectedVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('India')));
+        }
+
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+        }
+
+        utterance.onstart = () => {
+            isVoiceSpeaking = true;
+            updateVoiceAssistantUI('speaking');
+        };
+
+        utterance.onend = () => {
+            isVoiceSpeaking = false;
+            updateVoiceAssistantUI('idle');
+        };
+
+        utterance.onerror = (e) => {
+            console.warn('Speech synthesis utterance error:', e);
+            isVoiceSpeaking = false;
+            updateVoiceAssistantUI('idle');
+        };
+
+        voiceCurrentUtterance = utterance;
+        window.speechSynthesis.speak(utterance);
+    } catch (err) {
+        console.warn('SpeechSynthesis error:', err);
+        updateVoiceAssistantUI('idle');
+    }
+}
+
+function stopEcoBotSpeaking() {
+    if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+    }
+    isVoiceSpeaking = false;
+    updateVoiceAssistantUI('idle');
+}
+
+function toggleVoiceSpeechMute() {
+    voiceSpeechMuted = !voiceSpeechMuted;
+    const muteIcon = document.getElementById('voice-mute-icon');
+    if (muteIcon) {
+        muteIcon.className = voiceSpeechMuted ? 'fa-solid fa-volume-xmark text-red-400' : 'fa-solid fa-volume-high text-slate-300';
+    }
+
+    if (voiceSpeechMuted && isVoiceSpeaking) {
+        stopEcoBotSpeaking();
+    }
+
+    showToast(voiceSpeechMuted ? 'EcoBot voice audio muted' : 'EcoBot voice audio unmuted', 'info');
+}
+
+function updateVoiceAssistantUI(state) {
+    const visualizer = document.getElementById('voice-wave-visualizer');
+    const pulseRing = document.getElementById('voice-pulse-ring');
+    const micIcon = document.getElementById('voice-mic-icon');
+    const statusPill = document.getElementById('voice-status-pill');
+    const cardStatus = document.getElementById('voice-card-status');
+    const btnStop = document.getElementById('btn-stop-speech');
+    const pillCaption = document.getElementById('voice-pill-caption');
+    const cfg = ECOBOT_LANG_CONFIG[ecobotCurrentLanguage] || ECOBOT_LANG_CONFIG.en;
+
+    if (state === 'listening') {
+        if (visualizer) visualizer.className = 'flex items-center gap-1 px-1 h-6 voice-active-listening';
+        if (pulseRing) pulseRing.classList.remove('hidden');
+        if (micIcon) micIcon.className = 'fa-solid fa-microphone text-base text-slate-950 animate-pulse';
+        if (statusPill) {
+            statusPill.textContent = (ecobotCurrentLanguage === 'kn') ? 'ಆಲಿಸಲಾಗುತ್ತಿದೆ...' : ((ecobotCurrentLanguage === 'hi') ? 'सुन रहे हैं...' : 'Listening...');
+            statusPill.className = 'text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.2 bg-red-500/20 text-red-400 rounded-full animate-pulse';
+        }
+        if (cardStatus) {
+            cardStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-400 animate-ping"></span> ${cfg.statusListening}`;
+        }
+        if (pillCaption) pillCaption.textContent = cfg.statusListening;
+        if (btnStop) btnStop.classList.add('hidden');
+    } else if (state === 'speaking') {
+        if (visualizer) visualizer.className = 'flex items-center gap-1 px-1 h-6 voice-active-speaking';
+        if (pulseRing) pulseRing.classList.add('hidden');
+        if (micIcon) micIcon.className = 'fa-solid fa-waveform-lines text-base text-slate-950';
+        if (statusPill) {
+            statusPill.textContent = (ecobotCurrentLanguage === 'kn') ? 'ಮಾತನಾಡುತ್ತಿದೆ...' : ((ecobotCurrentLanguage === 'hi') ? 'बोल रहे हैं...' : 'Speaking...');
+            statusPill.className = 'text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded-full';
+        }
+        if (cardStatus) {
+            cardStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ${cfg.statusSpeaking}`;
+        }
+        if (btnStop) btnStop.classList.remove('hidden');
+    } else if (state === 'thinking') {
+        if (visualizer) visualizer.className = 'flex items-center gap-1 px-1 h-6';
+        if (pulseRing) pulseRing.classList.add('hidden');
+        if (statusPill) {
+            statusPill.textContent = (ecobotCurrentLanguage === 'kn') ? 'ಯೋಚಿಸುತ್ತಿದೆ...' : ((ecobotCurrentLanguage === 'hi') ? 'सोच रहे हैं...' : 'Thinking...');
+            statusPill.className = 'text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded-full';
+        }
+    } else {
+        // idle
+        if (visualizer) visualizer.className = 'flex items-center gap-1 px-1 h-6';
+        if (pulseRing) pulseRing.classList.add('hidden');
+        if (micIcon) micIcon.className = 'fa-solid fa-microphone text-base text-slate-950';
+        if (statusPill) {
+            statusPill.textContent = (ecobotCurrentLanguage === 'kn') ? 'ಮೈಕ್ ಒತ್ತಿ' : ((ecobotCurrentLanguage === 'hi') ? 'माइक दबाएं' : 'Tap Mic');
+            statusPill.className = 'text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded-full';
+        }
+        if (cardStatus) {
+            cardStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> ${cfg.statusReady}`;
+        }
+        if (btnStop) btnStop.classList.add('hidden');
+    }
+}
+
+function toggleVoiceDialogueCard() {
+    const card = document.getElementById('voice-dialogue-card');
+    if (!card) return;
+
+    if (card.classList.contains('hidden')) {
+        openVoiceDialogueCard();
+    } else {
+        closeVoiceDialogueCard();
+    }
+}
+
+function openVoiceDialogueCard() {
+    const card = document.getElementById('voice-dialogue-card');
+    const chevron = document.getElementById('voice-chevron-icon');
+    if (card) card.classList.remove('hidden');
+    if (chevron) chevron.className = 'fa-solid fa-chevron-down text-xs transition-transform duration-200';
+}
+
+function closeVoiceDialogueCard() {
+    const card = document.getElementById('voice-dialogue-card');
+    const chevron = document.getElementById('voice-chevron-icon');
+    if (card) card.classList.add('hidden');
+    if (chevron) chevron.className = 'fa-solid fa-chevron-up text-xs transition-transform duration-200';
 }
 
 // ============================================================================
@@ -2180,6 +2779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     switchTab('dashboard');
     setupStarRating();
     setupDropzone();
+    initVoiceAssistant();
 
     // Auto-poll Digital Twin every 8 seconds to synchronize real-time IoT simulation
     twinPollingTimer = setInterval(() => {

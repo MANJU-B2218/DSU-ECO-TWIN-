@@ -1,63 +1,45 @@
-# EcoWaste - Smart Waste Management Digital Twin 2.0 🌍♻️
+# DSU EcoTwin - Dayananda Sagar University Smart Waste Digital Twin 🌍♻️
 
-A complete, production-grade Smart Waste Management Digital Twin application featuring **Computer Vision**, **IoT Digital Twin Simulation**, and **Generative AI**.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Online-emerald?style=for-the-badge&logo=cloudflare)](https://mother-towers-academics-casino.trycloudflare.com)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge&logo=github)](https://github.com/MANJU-B2218/DSU-ECO-TWIN-.git)
+[![Location](https://img.shields.io/badge/Campus-DSU%20Harohalli%20(12.65954%2C%2077.45077)-orange?style=for-the-badge&logo=google-maps)](https://www.google.com/maps/search/?api=1&query=12.65954,77.45077)
 
-Built for hackathons and smart city civic deployment with zero mock data in production queries, full offline domain intelligence fallback, and real-time civic synchronization.
+A production-grade Smart Waste Management Digital Twin and AI civic ecosystem tailored specifically for **Dayananda Sagar University (DSU) Harohalli Campus, Karnataka**. Featuring **Computer Vision Waste Segregation**, **Autonomous IoT Smart Bins Telemetry**, **What-If Monsoon/Festival Simulation**, **TSP Fleet Route Optimization**, **EcoBot Voice Assistant (English, Kannada, Hindi)**, and an **Executive Municipal Reporting Suite**.
 
 ---
 
-## 🌟 Core Pillars & Feature Checklist
+## 🌐 Live Access Links
+* **Live Web App**: [https://mother-towers-academics-casino.trycloudflare.com](https://mother-towers-academics-casino.trycloudflare.com)
+* **GitHub Repository**: [https://github.com/MANJU-B2218/DSU-ECO-TWIN-.git](https://github.com/MANJU-B2218/DSU-ECO-TWIN-.git)
+* **Executive CSV Telemetry Export**: `/api/reports/export-csv`
+* **Complete Codebase PDF**: `/codebase.pdf`
+* **Interactive Pitch Deck**: `/slides`
 
-### 1. Computer Vision & Visual Intelligence
-- **Live Camera & Image Upload**: Point your webcam or upload photos with instant preview and multi-camera flip support.
-- **Deep Learning Transfer Learning**: MobileNetV2 architecture fine-tuned for 7 waste classes: `plastic`, `paper`, `metal`, `glass`, `organic`, `e-waste`, `cardboard`.
-- **Live Web Search & Exact Item Identification**: Enriches raw model classifications using real-time search knowledge to pinpoint specific real-world items (e.g. *"Clear PET Mineral Water Bottle (500ml)"*, *"Fresh Green Vegetable Scraps & Foliage"*).
-- **Bio-degradable vs Non-bio-degradable Segregation**: Clear color-coded status badges (Green = Bio-degradable, Red = Non-bio-degradable).
-- **Civic Municipal Bin Tip**: Dynamic routing cards showing whether the item goes into **Wet Bin (Green)**, **Dry Bin (Blue)**, **Recyclable Bin (Yellow)**, or **E-Waste Bin (Red/Black)**.
-- **Confidence Score & 60% Safety Threshold**: Visual confidence meter; displays a clear warning `"Not sure, please try again"` if model confidence is below 60%.
+---
 
-### 2. IoT Sensor Nodes & Live Telemetry
-- **Simulated Sensors**:
-  - Ultrasonic (HC-SR04): Bin fill level (0% - 100%+).
-  - Gas Sensor (MQ-135): Methane, odor, and decomposing organic emissions in ppm.
-  - Load Cell: Mass of waste in kg.
-  - GPS Module: Real-time latitude/longitude coordinates.
-- **Continuous Background Simulation**: Realistic waste accumulation, gas rise during hot/monsoon weather, and battery drain.
-- **Physical Hardware Bridge**: ESP32 / Arduino Wi-Fi HTTP POST telemetry endpoint:
-  ```bash
-  curl -X POST http://127.0.0.1:8000/api/iot/telemetry \
-    -H "Content-Type: application/json" \
-    -d '{"bin_code": "BIN-101", "fill_level": 82, "gas_ppm": 390, "weight_kg": 41.2}'
-  ```
+## 🌟 Core Pillars & Feature Highlights
 
-### 3. Digital Twin & Predictive Fleet Management
-- **Virtual Digital Twin Map**: Live interactive Leaflet map of all municipal bins and collection trucks with real-time status color coding:
-  - 🟢 **Green**: Normal (<50% full)
-  - 🟡 **Yellow**: Moderate (50% - 80% full)
-  - 🔴 **Red**: Critical / Overflow (>80% full)
-  - 🟣 **Purple**: Gas / Methane Odor Spike (>400 ppm)
-  - 🚚 **Blue**: Active GPS Fleet Vehicles
-- **What-If Simulation Engine**: Interactive slider simulating: *"What happens if we skip collection for 1 to 4 days during summer heat or monsoon storms?"* Real-time calculation of projected overflow bins, accumulated mass, estimated penalty cleanup costs (₹), and wasted emergency fuel.
-- **Shortest Path Route Optimization (TSP)**: Nearest-Neighbor Traveling Salesperson route calculating the optimal path visiting *only* critical bins, displaying live polyline tracks, travel distance, diesel savings, and CO2 emission reductions.
+### 1. 🎤 EcoBot Multi-Language Voice Assistant (EN • ಕನ್ನಡ • हिंदी)
+- **Web Speech API**: Instant hands-free speech recognition in English (`en-IN`), Kannada (`kn-IN`), and Hindi (`hi-IN`).
+- **Google Neural Translation**: Translates queries and responses dynamically between English, Kannada, and Hindi.
+- **Natural Voice Synthesis (TTS)**: Cleans markdown syntax before speaking so the voice flows naturally without pronouncing symbols.
+- **5-Bar Real-Time Audio Visualizer**: Animated equalizer waveforms matching listening, thinking, and speaking states.
+- **Quick Voice Chips**: One-tap queries (*"Full Bins?"*, *"E-Waste?"*, *"Food Waste?"*) localized into all 3 languages.
 
-### 4. Generative AI Suite
-- **Dispatch Recommendation Engine**: AI synthesized recommendations reading live bin and truck telemetry (e.g. *"Bin 7 is at 94% with 410 ppm methane, divert Truck TRK-01 immediately"*).
-- **EcoBot Interactive Chatbot**: Answers citizen inquiries (*"How do I dispose of a swollen lithium battery?"*, *"Which bins are full in the city right now?"*).
-- **Automated Municipal Daily Report**: Generates a formal BBMP Solid Waste Daily Executive Summary with KPIs, fleet metrics, and hotspot warnings with one-click Print / PDF export.
+### 2. 🏛️ Executive Daily Municipal Report Export Center
+- **Executive Report Modal**: Displays DSU Harohalli campus solid waste summary, 4 KPI matrix cards, 8-node IoT telemetry table, and hotspot dispatch advisories.
+- **1-Click CSV Export**: Downloads structured dataset directly with official university headers (`/api/reports/export-csv`).
+- **Official Print / PDF Stylesheet**: Clean `@media print` layout formatting the executive report for official submission to municipal liaisons.
 
-### 5. Frontend & Civic Engagement
-- **9 Dynamic Modules**:
-  1. `Dashboard`: Real-time KPI counters, category distribution chart, 30-day activity trend, live alert stream.
-  2. `Scan Waste`: Camera preview + file upload dropzone with exact item identification and disposal card.
-  3. `Digital Twin`: Virtual map, What-If simulation slider, TSP route optimizer, and live IoT sensor gauges.
-  4. `Report Waste`: Citizen incident reporting with photo upload and one-click GPS coordinate auto-detection.
-  5. `Alerts Hub`: Live escalation hub for critical bins, gas spikes, and pending citizen tickets.
-  6. `Nearby Bins`: Geolocation facility locator showing nearest public bins and recycling depots with "Get Directions" links.
-  7. `AI Assistant`: GenAI dispatch advice, EcoBot chat, and municipal daily report generator.
-  8. `Leaderboard`: Verified SQLite community eco-points leaderboard (10 pts earned per real scan).
-  9. `Reviews`: Real citizen review submissions with 1-5 star rating and calculated average rating.
-- **Dark Mode**: Toggle button switching between light eco green and dark neon themes with localStorage persistence.
-- **Multi-Language Support**: Instant client-side switching between **English**, **हिन्दी (Hindi)**, and **ಕನ್ನಡ (Kannada)**.
+### 3. 📷 Computer Vision & Exact Item Identification
+- **Deep Learning Transfer Learning**: MobileNetV2 fine-tuned on 7 waste classes: `plastic`, `paper`, `metal`, `glass`, `organic`, `e-waste`, `cardboard`.
+- **Bio-degradable vs Non-bio-degradable Segregation**: Automatic classification with confidence meters and campus bin color-coding (Green = Wet, Blue = Dry, Yellow = Recyclables, Red = E-Waste).
+
+### 4. 🛰️ Digital Twin & Autonomous Campus Fleet (TSP)
+- **Interactive Leaflet Map**: Centered at Dayananda Sagar University Harohalli Campus (`12.65954, 77.45077`).
+- **Real-time IoT Nodes**: Ultrasonic (Fill level %), Gas MQ-135 (Fermentation PPM), Load Cell (Mass kg), and Battery telemetry.
+- **What-If Simulation Engine**: Sliders simulating 1–4 day skipped collections during campus festivals and monsoon surges.
+- **TSP Route Optimization**: Dynamic Traveling Salesperson algorithm calculating shortest route for electric collection buggies.
 
 ---
 
@@ -65,59 +47,53 @@ Built for hackathons and smart city civic deployment with zero mock data in prod
 
 ```
 ecowaste/
-├── dataset/                    # Kaggle TrashNet / Garbage Classification dataset
+├── dataset/                    # Waste classification dataset categories
 ├── model/
-│   ├── class_labels.json       # 7 waste classes (organic, plastic, paper, metal, glass, e-waste, cardboard)
+│   ├── class_labels.json       # 7 waste classes
 │   ├── bio_mapping.json        # Bio-degradable vs Non-bio-degradable mapping
-│   └── waste_classifier.pth   # Fine-tuned PyTorch MobileNetV2 model weights
+│   └── waste_classifier.pth   # MobileNetV2 model weights
 ├── static/
-│   ├── css/
-│   │   └── style.css           # Custom styles, dark mode, cylinder gauges, animations
-│   └── js/
-│       └── app.js              # Complete frontend engine, Leaflet maps, What-If, GenAI, i18n
+│   ├── css/style.css           # Glassmorphism, waveform audio equalizer, print stylesheet
+│   ├── js/app.js               # Digital twin map, EcoBot speech engine, multi-language controller
+│   └── downloads/              # Complete codebase publication PDF
 ├── templates/
-│   └── index.html              # Single Page Application HTML with all 9 modular tabs
-├── ai_service.py               # GenAI recommendations, EcoBot chat, municipal daily report
+│   ├── index.html              # Main web application with EcoBot Voice Pill Bar and Report Modal
+│   └── slides.html             # Fullscreen interactive presentation deck
+├── ai_service.py               # GenAI dispatch intelligence, Google Translation (EN/KN/HI)
 ├── app.py                      # Flask REST API server with Waitress production WSGI
-├── database.py                 # SQLite database schema, seeding, migrations, and queries
-├── iot_simulator.py            # IoT sensor stream daemon, What-If calculator, and TSP router
-├── predict.py                  # Computer Vision inference, web lookup, thread isolation
-├── train_model.py              # Kaggle dataset downloader, augmentation, training & evaluation
+├── database.py                 # SQLite database for DSU campus smart bins and fleet
+├── iot_simulator.py            # IoT sensor telemetry stream daemon, What-If calculator, TSP router
+├── predict.py                  # Computer Vision inference and classification
 ├── requirements.txt            # Python dependencies
-├── .env.example                # Example configuration file
-└── README.md                   # Complete documentation and run instructions
+└── README.md                   # Project documentation
 ```
 
 ---
 
 ## 🚀 Run Instructions
 
-### 1. Install Dependencies
+### 1. Clone the Repository
 ```bash
-cd ecowaste
+git clone https://github.com/MANJU-B2218/DSU-ECO-TWIN-.git
+cd DSU-ECO-TWIN-
+```
+
+### 2. Install Dependencies
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. (Optional) Configure API Keys
-Copy `.env.example` to `.env`:
-```bash
-cp .env.example .env
-```
-*Note: If no Gemini or OpenAI key is provided, the built-in domain intelligence engine will automatically handle all GenAI chatbot queries and reports offline!*
-
-### 3. (Optional) Train or Re-train the Model on Kaggle Dataset
-```bash
-python train_model.py
-```
-*(A pre-initialized model with all 7 classes is already included in `model/waste_classifier.pth` for instant plug-and-play demo).*
-
-### 4. Start the Application Server
+### 3. Start the Application Server
 ```bash
 python app.py
 ```
 
-### 5. Access the Web Application
-Open your web browser and navigate to:
+### 4. Open the Web Application
+Open your browser and navigate to:
 ```
 http://127.0.0.1:8000
+```
+Or view the live cloud deployment:
+```
+https://mother-towers-academics-casino.trycloudflare.com
 ```

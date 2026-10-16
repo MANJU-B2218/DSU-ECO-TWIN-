@@ -3,7 +3,7 @@
 Provides high-accuracy waste classification and exact item identification using:
 1. Google Gemini Multimodal Vision API (if GEMINI_API_KEY is configured)
 2. PyTorch MobileNetV3 Large pre-trained on 1,000 real-world ImageNet object categories
-3. Google Lens reverse visual search & web knowledge integration
+3. Google & Web Search Engine Knowledge Integration
 4. Rigorous confidence evaluation with a 60% threshold ("Not sure, please try again")
 5. Municipal segregation routing (Wet, Dry, Recyclable, E-Waste) and Bio-degradability
 """
@@ -374,7 +374,7 @@ def detect_object_via_search(query: str) -> Dict[str, Any]:
         "search_snippets": snippets[:2],
         "detection_engine": "Google & Web Search Engine Knowledge AI",
         "web_verified": True,
-        "google_lens_query": q_clean,
+        "google_search_query": q_clean,
     }
 
 
@@ -412,7 +412,7 @@ def _predict_direct(image_bytes: bytes) -> Dict[str, Any]:
             "is_confident": conf >= 60.0,
             "web_verified": True,
             "detection_engine": "Google Gemini Multimodal Vision",
-            "google_lens_query": gemini_result.get("item_name", "waste item"),
+            "google_search_query": gemini_result.get("item_name", "waste item"),
         }
 
     # 2. Local Deep Learning Vision (MobileNetV3 with 1,000 Real-World Classes)
@@ -471,7 +471,7 @@ def _predict_direct(image_bytes: bytes) -> Dict[str, Any]:
         "is_confident": is_confident,
         "web_verified": True,
         "detection_engine": "MobileNetV3 Deep Learning (1,000 Classes) + Google Search Engine",
-        "google_lens_query": top_category,
+        "google_search_query": top_category,
         "search_snippets": search_snippets,
     }
 

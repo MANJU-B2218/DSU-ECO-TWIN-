@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoWaste - Smart Waste Management Digital Twin</title>
+    <title>DSU EcoTwin - Smart Campus Waste Management Digital Twin (Dayananda Sagar University)</title>
 
     <!-- Google Fonts: Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,14 +57,14 @@
                 <!-- Logo & Brand -->
                 <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
                     <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-green-200">
-                        <i class="fa-solid fa-leaf text-2xl"></i>
+                        <i class="fa-solid fa-graduation-cap text-2xl"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="text-2xl font-extrabold tracking-tight text-slate-900">Eco<span class="text-emerald-600">Waste</span></span>
-                            <span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">Digital Twin 2.0</span>
+                            <span class="text-2xl font-extrabold tracking-tight text-slate-900">DSU <span class="text-emerald-600">EcoTwin</span></span>
+                            <span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">Harohalli Campus</span>
                         </div>
-                        <p class="text-xs text-slate-500 font-medium">IoT Sensors • Computer Vision • GenAI</p>
+                        <p class="text-xs text-slate-500 font-medium">Dayananda Sagar University • Smart Campus Digital Twin</p>
                     </div>
                 </div>
 
@@ -101,6 +101,9 @@
                     <a href="/slides" target="_blank" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition">
                         <i class="fa-solid fa-chalkboard-user"></i> <span>Pitch Deck</span>
                     </a>
+                    <a href="/codebase.pdf" target="_blank" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition" title="Complete Python Codebase PDF">
+                        <i class="fa-solid fa-file-pdf text-red-400"></i> <span>Code PDF</span>
+                    </a>
                 </nav>
 
                 <!-- Header Actions: IoT Status, Language & Dark Mode -->
@@ -108,8 +111,8 @@
                     <!-- IoT Status Badge -->
                     <div class="hidden sm:flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-800 rounded-full border border-emerald-200 text-xs font-medium">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="font-bold">IoT Stream Active</span>
-                        <span class="text-[10px] bg-emerald-200 text-emerald-900 px-1.5 py-0.2 rounded font-mono">Simulated</span>
+                        <span class="font-bold">DSU Campus IoT Active</span>
+                        <span class="text-[10px] bg-emerald-200 text-emerald-900 px-1.5 py-0.2 rounded font-mono">Harohalli</span>
                     </div>
 
                     <!-- Multi-language Selector -->
@@ -163,6 +166,9 @@
             <button onclick="switchTab('reviews'); toggleMobileMenu();" class="w-full text-left py-2.5 px-3 rounded-lg text-sm font-medium text-slate-700 hover:bg-emerald-50 flex items-center gap-2">
                 <i class="fa-solid fa-star text-amber-400"></i> <span>Reviews</span>
             </button>
+            <a href="/codebase.pdf" target="_blank" class="w-full text-left py-2.5 px-3 rounded-lg text-sm font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-file-pdf text-red-500"></i> <span>Download Codebase PDF (63 Pages)</span>
+            </a>
         </div>
     </header>
 
@@ -176,13 +182,17 @@
             <!-- Hero Banner -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight" data-i18n="dash_title">Smart Waste Command Center</h1>
-                    <p class="text-slate-500 mt-1" data-i18n="dash_subtitle">Real-time IoT telemetry, AI computer vision segregation, and digital twin fleet management.</p>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight" data-i18n="dash_title">DSU Campus Smart Waste Command Center</h1>
+                    <p class="text-slate-500 mt-1" data-i18n="dash_subtitle">Real-time IoT telemetry, AI computer vision segregation, and digital twin fleet management across Dayananda Sagar University Harohalli Campus.</p>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3">
                     <button onclick="loadDashboard()" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 text-sm font-medium shadow-sm transition">
                         <i class="fa-solid fa-arrows-rotate text-emerald-600" id="dash-refresh-icon"></i>
                         <span>Refresh</span>
+                    </button>
+                    <button onclick="openExecutiveReportModal()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-purple-200 transition">
+                        <i class="fa-solid fa-file-invoice"></i>
+                        <span>Executive Report</span>
                     </button>
                     <button onclick="switchTab('scan')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-emerald-200 transition">
                         <i class="fa-solid fa-qrcode"></i>
@@ -380,7 +390,7 @@
                             </label>
                             <div class="relative">
                                 <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" id="camera-username" placeholder="e.g. EcoChampion21" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <input type="text" id="camera-username" placeholder="e.g. DSU_Engg_23 or Prof_Kulkarni" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                             </div>
                         </div>
 
@@ -436,7 +446,7 @@
                             </label>
                             <div class="relative">
                                 <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" id="upload-username" placeholder="e.g. EcoChampion21" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <input type="text" id="upload-username" placeholder="e.g. DSU_Engg_23 or Prof_Kulkarni" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                             </div>
                         </div>
 
@@ -521,7 +531,7 @@
                                     </label>
                                     <div class="relative">
                                         <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                        <input type="text" id="search-username" placeholder="e.g. EcoChampion21" class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <input type="text" id="search-username" placeholder="e.g. DSU_Engg_23 or Prof_Kulkarni" class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     </div>
                                 </div>
 
@@ -568,7 +578,7 @@
                                 <div class="flex items-center gap-2 mb-1">
                                     <span class="text-xs uppercase font-semibold text-slate-400 tracking-wider">Detected Specific Item</span>
                                     <span id="result-detection-engine" class="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                        <i class="fa-brands fa-google text-emerald-600"></i> Google Lens &amp; Deep Learning
+                                        <i class="fa-solid fa-microchip text-emerald-600"></i> AI Vision &amp; Google Search Engine
                                     </span>
                                 </div>
                                 <h2 id="result-item-name" class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-0.5">Plastic Mineral Water Bottle</h2>
@@ -635,22 +645,17 @@
                             </div>
                         </div>
 
-                        <!-- Action Buttons: Google Lens & Scan Another -->
+                        <!-- Action Buttons: Scan Another & Search More -->
                         <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
-                            <button type="button" onclick="searchWithGoogleLens()" id="btn-google-lens" class="inline-flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-200 hover:border-emerald-500 font-semibold rounded-xl shadow-sm transition">
-                                <i class="fa-brands fa-google text-emerald-600 text-lg"></i>
-                                <span>Verify on Google Lens</span>
-                            </button>
                             <button type="button" onclick="resetScanner()" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition shadow">
                                 <i class="fa-solid fa-arrow-rotate-left"></i>
                                 <span>Scan Another Item</span>
                             </button>
+                            <button type="button" onclick="setScanMode('search')" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition shadow">
+                                <i class="fa-brands fa-google"></i>
+                                <span>Search with Google Engine</span>
+                            </button>
                         </div>
-
-                        <!-- Hidden Google Lens Form Submission -->
-                        <form id="google-lens-form" action="https://lens.google.com/v3/upload" method="POST" enctype="multipart/form-data" target="_blank" class="hidden">
-                            <input type="file" name="encoded_image" id="google-lens-file-input">
-                        </form>
                     </div>
                 </div>
             </div>
@@ -849,7 +854,7 @@
                                     <div>
                                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Location / Landmark</label>
                                         <div class="relative">
-                                            <input type="text" id="report-location" required placeholder="e.g. Near Indiranagar Metro Station" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                            <input type="text" id="report-location" required placeholder="e.g. DSU Food Court, School of Engineering, Hostel Block A" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                             <button type="button" onclick="detectReportLocation()" title="Auto-detect GPS" class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600 hover:text-emerald-700">
                                                 <i class="fa-solid fa-location-crosshairs text-base"></i>
                                             </button>
@@ -928,15 +933,21 @@
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold mb-2">
-                                <i class="fa-solid fa-location-dot"></i> GPS Facility Locator
+                                <i class="fa-solid fa-graduation-cap"></i> DSU Harohalli Campus &amp; Public Locator
                             </div>
-                            <h1 class="text-2xl md:text-3xl font-bold text-slate-900">Nearby Public Waste Facilities</h1>
-                            <p class="text-slate-500 text-sm mt-1">Locate recycling points, compost depots, and public municipal bins near your GPS position.</p>
+                            <h1 class="text-2xl md:text-3xl font-bold text-slate-900">Nearby Campus &amp; Public Waste Facilities</h1>
+                            <p class="text-slate-500 text-sm mt-1">Locate smart bins, recycling points, compost yards, and industrial depots across DSU Harohalli campus with direct Google Maps navigation.</p>
                         </div>
-                        <button id="btn-find-bins" onclick="findNearbyBins()" class="inline-flex items-center gap-3 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md shadow-emerald-200 transition">
-                            <i class="fa-solid fa-crosshairs text-lg"></i>
-                            <span>Find Nearby Bins</span>
-                        </button>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button type="button" onclick="loadDsuCampusFacilities()" class="inline-flex items-center gap-2 px-5 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md shadow-blue-200 transition">
+                                <i class="fa-solid fa-graduation-cap text-base"></i>
+                                <span>DSU Campus Facilities</span>
+                            </button>
+                            <button id="btn-find-bins" onclick="findNearbyBins()" class="inline-flex items-center gap-2 px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md shadow-emerald-200 transition">
+                                <i class="fa-solid fa-crosshairs text-base"></i>
+                                <span>Find Nearby Bins</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div id="bins-error-banner" class="hidden mt-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-start gap-3">
@@ -1065,26 +1076,41 @@
                         </div>
                     </div>
 
-                    <!-- Municipal Report Preview -->
+                    <!-- Executive Municipal & Campus Report Center -->
                     <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between h-[520px]">
                         <div>
-                            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                            <div class="flex flex-wrap items-center justify-between pb-4 border-b border-slate-100 mb-4 gap-2">
                                 <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-file-contract text-purple-600"></i>
-                                    <h4 class="font-bold text-slate-900 text-sm">Automated Municipality Daily Report</h4>
+                                    <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold">
+                                        <i class="fa-solid fa-file-shield"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900 text-sm">Executive Municipal Report</h4>
+                                        <p class="text-[10px] text-slate-400">DSU Harohalli Digital Twin Telemetry</p>
+                                    </div>
                                 </div>
-                                <button onclick="printReport()" class="text-xs text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1">
-                                    <i class="fa-solid fa-print"></i> Print
-                                </button>
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" onclick="exportReportToCsv()" class="text-[11px] bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 px-2.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1" title="Download CSV Dataset">
+                                        <i class="fa-solid fa-file-csv text-emerald-600"></i> <span>CSV</span>
+                                    </button>
+                                    <button type="button" onclick="openExecutiveReportModal()" class="text-[11px] bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg font-bold shadow-sm transition flex items-center gap-1" title="Full Screen Official Briefing">
+                                        <i class="fa-solid fa-expand"></i> <span>Full Briefing</span>
+                                    </button>
+                                </div>
                             </div>
 
-                            <div id="report-view-container" class="chat-scroll p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-mono text-slate-800 leading-relaxed">
-                                <p class="text-slate-400 text-center py-12">Click "Generate Daily Municipality Report" above to compile the latest executive summary.</p>
+                            <div id="report-view-container" class="chat-scroll p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-sans text-slate-800 leading-relaxed max-h-[340px] overflow-y-auto">
+                                <p class="text-slate-400 text-center py-12">Click "Generate Daily Municipality Report" above or "Full Briefing" to compile the latest executive summary.</p>
                             </div>
                         </div>
 
-                        <div class="pt-3 text-[11px] text-slate-400 text-center">
-                            Compiled automatically via BBMP Solid Waste Digital Twin Telemetry.
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                            <span class="flex items-center gap-1">
+                                <i class="fa-solid fa-stamp text-emerald-600"></i> Official DSU Operations Briefing
+                            </span>
+                            <button type="button" onclick="printOfficialReport()" class="text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-print"></i> Print / PDF
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1098,17 +1124,17 @@
             <div class="max-w-5xl mx-auto">
                 <div class="text-center mb-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-semibold mb-2">
-                        <i class="fa-solid fa-medal"></i> Eco Champions
+                        <i class="fa-solid fa-graduation-cap"></i> DSU Eco Champions
                     </div>
-                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Eco-Warrior Community Leaderboard</h1>
-                    <p class="text-slate-500 mt-2">Earn 10 Eco-Points with every real waste scan and champion sustainable segregation in your community.</p>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">DSU Campus Eco-Warrior Leaderboard</h1>
+                    <p class="text-slate-500 mt-2">Earn 10 Eco-Points with every verified waste scan across DSU Harohalli academic blocks, cafeterias, and hostels.</p>
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-6 md:p-8 border-b border-slate-100 flex items-center justify-between">
                         <div>
-                            <h3 class="font-bold text-slate-900 text-lg">Top Environmental Contributors</h3>
-                            <p class="text-xs text-slate-400">Updated in real-time with verified classifications</p>
+                            <h3 class="font-bold text-slate-900 text-lg">Top Campus Environmental Contributors</h3>
+                            <p class="text-xs text-slate-400">Updated in real-time with verified student &amp; faculty classifications</p>
                         </div>
                         <button onclick="loadLeaderboard()" class="text-slate-400 hover:text-emerald-600 transition text-sm flex items-center gap-1.5">
                             <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh
@@ -1117,8 +1143,8 @@
 
                     <div id="leaderboard-empty-state" class="hidden empty-state py-16 text-center text-slate-400">
                         <i class="fa-solid fa-trophy text-5xl mb-3 text-slate-300"></i>
-                        <h4 class="text-base font-bold text-slate-700">No scans yet</h4>
-                        <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">Start scanning waste to earn eco-points!</p>
+                        <h4 class="text-base font-bold text-slate-700">No DSU student scans yet</h4>
+                        <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">Be the first Dayananda Sagar University student or faculty to scan waste and top the campus leaderboard!</p>
                     </div>
 
                     <div id="leaderboard-table-container" class="overflow-x-auto">
@@ -1126,7 +1152,7 @@
                             <thead>
                                 <tr class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
                                     <th class="py-4 px-6 text-center w-20">Rank</th>
-                                    <th class="py-4 px-6">Username</th>
+                                    <th class="py-4 px-6">DSU Contributor</th>
                                     <th class="py-4 px-6 text-center">Verified Scans</th>
                                     <th class="py-4 px-6 text-right">Eco-Points</th>
                                 </tr>
@@ -1144,22 +1170,22 @@
         <section id="tab-reviews" class="tab-pane hidden fade-in">
             <div class="max-w-6xl mx-auto">
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Citizen Feedback</h1>
-                    <p class="text-slate-500 mt-2">Read experiences from other eco-conscious citizens and share your thoughts.</p>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">DSU Campus Feedback &amp; Reviews</h1>
+                    <p class="text-slate-500 mt-2">Read experiences from students and faculty across Dayananda Sagar University Harohalli Campus.</p>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-1">
                         <div class="bg-white rounded-3xl p-6 md:p-7 shadow-sm border border-slate-100 sticky top-28">
-                            <h3 class="text-lg font-bold text-slate-900 mb-1">Leave a Review</h3>
-                            <p class="text-xs text-slate-400 mb-5">How has EcoWaste assisted your recycling?</p>
+                            <h3 class="text-lg font-bold text-slate-900 mb-1">Leave a Campus Review</h3>
+                            <p class="text-xs text-slate-400 mb-5">How has DSU EcoTwin assisted waste segregation in your department or hostel?</p>
 
                             <form id="review-form" onsubmit="handleReviewSubmit(event)" class="space-y-4">
                                 <div>
                                     <label for="review-name" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
-                                        Your Name <span class="text-red-500">*</span>
+                                        Your Name / Department <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="text" id="review-name" required placeholder="Jane Doe" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <input type="text" id="review-name" required placeholder="e.g. Rahul Sharma (DSU CSE)" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 </div>
 
                                 <div>
@@ -1176,7 +1202,7 @@
 
                                 <div>
                                     <label for="review-comment" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Comment <span class="text-red-500">*</span></label>
-                                    <textarea id="review-comment" required rows="4" placeholder="Share your experience..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"></textarea>
+                                    <textarea id="review-comment" required rows="4" placeholder="Share your experience on campus waste segregation..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"></textarea>
                                 </div>
 
                                 <button type="submit" id="btn-submit-review" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md shadow-emerald-200 transition">
@@ -1199,13 +1225,13 @@
                                 </div>
                             </div>
                             <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 font-medium text-xs">
-                                <i class="fa-solid fa-shield-halved"></i> Verified Community
+                                <i class="fa-solid fa-graduation-cap"></i> DSU Campus Community
                             </span>
                         </div>
 
                         <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
                             <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-                                <h3 class="font-bold text-slate-900 text-lg">Recent Community Reviews</h3>
+                                <h3 class="font-bold text-slate-900 text-lg">Recent Campus Community Reviews</h3>
                                 <button onclick="loadReviews()" class="text-slate-400 hover:text-emerald-600 transition text-sm">
                                     <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh
                                 </button>
@@ -1213,8 +1239,8 @@
 
                             <div id="reviews-empty-state" class="hidden empty-state py-12 text-center text-slate-400">
                                 <i class="fa-regular fa-comments text-4xl mb-3 text-slate-300"></i>
-                                <h4 class="text-base font-bold text-slate-700">No reviews yet</h4>
-                                <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">Be the first to share your experience!</p>
+                                <h4 class="text-base font-bold text-slate-700">No campus reviews yet</h4>
+                                <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">Be the first DSU student or faculty member to submit your review!</p>
                             </div>
 
                             <div id="reviews-list" class="space-y-4"></div>
@@ -1230,15 +1256,274 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-leaf text-emerald-600 text-lg"></i>
-                <span class="text-sm font-semibold text-slate-700">EcoWaste &copy; 2026 - Smart Waste Management Digital Twin</span>
+                <span class="text-sm font-semibold text-slate-700">DSU EcoTwin &copy; 2026 - Dayananda Sagar University, Harohalli Campus</span>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="/codebase.pdf" target="_blank" class="text-xs text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 transition shadow-sm">
+                    <i class="fa-solid fa-file-pdf text-red-500"></i>
+                    <span>Python Codebase PDF (63 Pages)</span>
+                </a>
                 <span class="text-xs text-slate-500 font-medium px-3 py-1 bg-slate-100 rounded-full">
                     <i class="fa-solid fa-microchip text-emerald-600 mr-1"></i> Computer Vision • IoT Digital Twin • GenAI
                 </span>
             </div>
         </div>
     </footer>
+
+    <!-- =============================================================== -->
+    <!-- EXECUTIVE DAILY MUNICIPAL & CAMPUS REPORT MODAL                -->
+    <!-- =============================================================== -->
+    <div id="executive-report-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto modal-backdrop">
+        <div id="executive-report-modal-content" class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="p-6 bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950 text-white flex items-center justify-between border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-2xl shadow-lg">
+                        <i class="fa-solid fa-file-shield"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs uppercase font-extrabold tracking-widest text-emerald-400">Dayananda Sagar University • Harohalli Campus</span>
+                            <span class="text-[10px] bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-full font-mono">Official Briefing</span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5">Executive Daily Solid Waste Management Report</h2>
+                    </div>
+                </div>
+                <button type="button" onclick="closeExecutiveReportModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Export Actions Toolbar -->
+            <div id="report-export-toolbar" class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span id="modal-report-id" class="font-mono font-bold text-slate-700 bg-white px-2 py-1 rounded-md border border-slate-200">DSU-REP-01</span>
+                    <span id="modal-report-timestamp" class="text-slate-400">Generated today</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="exportReportToCsv()" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 font-semibold rounded-xl text-xs shadow-sm transition">
+                        <i class="fa-solid fa-file-csv text-emerald-600"></i>
+                        <span>Export CSV Telemetry</span>
+                    </button>
+                    <button type="button" onclick="copyExecutiveSummary()" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold rounded-xl text-xs shadow-sm transition">
+                        <i class="fa-regular fa-copy text-slate-500"></i>
+                        <span>Copy Summary</span>
+                    </button>
+                    <button type="button" onclick="printOfficialReport()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-md shadow-purple-200 transition">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Print / Export PDF</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Printable Report Body -->
+            <div class="p-6 md:p-8 overflow-y-auto chat-scroll space-y-6 text-slate-800" id="printable-report-area">
+                <!-- Executive Narrative -->
+                <div class="p-5 bg-emerald-50/70 border border-emerald-200 rounded-2xl">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-900 mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-info text-emerald-600"></i> Executive Briefing Summary
+                    </h4>
+                    <p id="modal-report-narrative" class="text-sm leading-relaxed text-emerald-950 font-medium">
+                        Loading executive briefing...
+                    </p>
+                </div>
+
+                <!-- 4 KPI Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Total Waste Managed</span>
+                        <div id="modal-kpi-tons" class="text-2xl font-extrabold text-slate-900 mt-1">0.0 t</div>
+                        <span class="text-[10px] text-emerald-600 font-semibold">Campus Grounds</span>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Diversion Rate</span>
+                        <div id="modal-kpi-diversion" class="text-2xl font-extrabold text-emerald-600 mt-1">0.0%</div>
+                        <span class="text-[10px] text-emerald-600 font-semibold">Wet Waste Composted</span>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Energy Conserved</span>
+                        <div id="modal-kpi-fuel" class="text-2xl font-extrabold text-blue-600 mt-1">0.0 L</div>
+                        <span class="text-[10px] text-blue-600 font-semibold">TSP EV Routing</span>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Carbon Offset</span>
+                        <div id="modal-kpi-co2" class="text-2xl font-extrabold text-emerald-700 mt-1">0.0 kg</div>
+                        <span class="text-[10px] text-emerald-600 font-semibold">CO2e Mitigated</span>
+                    </div>
+                </div>
+
+                <!-- Smart Bins Status Table -->
+                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-trash-can text-slate-500"></i> DSU Harohalli Smart Bins Real-Time Status
+                        </h4>
+                        <span class="text-[11px] text-slate-500 font-mono">8 IoT Nodes</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/60 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                    <th class="py-2.5 px-4">Bin Code</th>
+                                    <th class="py-2.5 px-4">Campus Location</th>
+                                    <th class="py-2.5 px-4 text-center">Fill Level</th>
+                                    <th class="py-2.5 px-4 text-center">Gas (PPM)</th>
+                                    <th class="py-2.5 px-4 text-center">Weight</th>
+                                    <th class="py-2.5 px-4 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-bins-tbody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Hotspot Warnings & Operational Action -->
+                <div class="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-900 mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Hotspot Warnings &amp; Dispatch Protocol
+                    </h4>
+                    <ul id="modal-hotspots-list" class="space-y-1.5 text-xs text-amber-950 font-medium"></ul>
+                </div>
+
+                <!-- Official Verification Stamp -->
+                <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-stamp text-emerald-600 text-lg"></i>
+                        <span>Verified by DSU Green Campus Initiative • Solid Waste Municipal Liaison Cell</span>
+                    </div>
+                    <span class="font-mono text-[11px] text-slate-400">Digital Twin Telemetry SHA-256 Verified</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- ECOBOT VOICE ASSISTANT FLOATING PILL BAR (SPEECH AI)            -->
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+    <!-- ECOBOT VOICE ASSISTANT FLOATING PILL BAR (SPEECH AI)            -->
+    <!-- =============================================================== -->
+    <div id="ecobot-voice-bar-wrapper" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center pointer-events-none select-none">
+        
+        <!-- Floating Voice Transcript & Dialogue Response Card -->
+        <div id="voice-dialogue-card" class="pointer-events-auto hidden mb-3 w-[92vw] max-w-lg bg-slate-950/95 backdrop-blur-2xl border border-emerald-500/40 rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.6)] text-white transition-all duration-300">
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3 gap-2">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 flex items-center justify-center text-sm font-bold shadow-md shadow-emerald-500/20">
+                        <i class="fa-solid fa-microphone-lines"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-extrabold tracking-wide text-white uppercase flex items-center gap-1.5">
+                            <span>EcoBot Voice Intelligence</span>
+                            <span id="voice-mode-badge" class="px-1.5 py-0.2 bg-emerald-500/20 text-emerald-400 text-[10px] rounded-full font-mono">Live</span>
+                        </h4>
+                        <p class="text-[11px] text-slate-400">DSU Harohalli Smart Waste Assistant</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <!-- Dialogue Language Switcher -->
+                    <div class="flex items-center p-0.5 bg-slate-900 rounded-full border border-slate-700 text-[10px] font-bold">
+                        <button type="button" onclick="setEcoBotLanguage('en')" id="dialogue-lang-en" class="px-2 py-0.5 rounded-full transition bg-emerald-500 text-slate-950 font-bold shadow-sm" title="English">EN</button>
+                        <button type="button" onclick="setEcoBotLanguage('kn')" id="dialogue-lang-kn" class="px-2 py-0.5 rounded-full transition text-slate-400 hover:text-white" title="ಕನ್ನಡ (Kannada)">ಕನ್ನಡ</button>
+                        <button type="button" onclick="setEcoBotLanguage('hi')" id="dialogue-lang-hi" class="px-2 py-0.5 rounded-full transition text-slate-400 hover:text-white" title="हिंदी (Hindi)">हिंदी</button>
+                    </div>
+                    <button type="button" onclick="toggleVoiceSpeechMute()" id="btn-voice-mute" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition" title="Mute/Unmute Speech Output">
+                        <i class="fa-solid fa-volume-high" id="voice-mute-icon"></i>
+                    </button>
+                    <button type="button" onclick="closeVoiceDialogueCard()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition" title="Close Dialogue">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dialogue Body -->
+            <div class="space-y-3 max-h-56 overflow-y-auto chat-scroll pr-1">
+                <!-- User Question Bubble -->
+                <div id="voice-user-bubble" class="hidden flex items-start gap-2 text-xs">
+                    <span class="px-2 py-1 bg-slate-800 text-slate-300 rounded-lg text-[10px] font-mono shrink-0">You</span>
+                    <p id="voice-user-text" class="bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 p-2.5 rounded-2xl rounded-tl-none leading-relaxed flex-1"></p>
+                </div>
+
+                <!-- Bot Response Bubble -->
+                <div id="voice-bot-bubble" class="flex items-start gap-2 text-xs">
+                    <span class="px-2 py-1 bg-emerald-600 text-white rounded-lg text-[10px] font-bold shrink-0">EcoBot</span>
+                    <div id="voice-bot-text" class="bg-slate-800/80 border border-slate-700 text-slate-100 p-3 rounded-2xl rounded-tl-none leading-relaxed flex-1 font-sans">
+                        Tap the microphone and ask: <em>"Which bins are full in DSU?"</em> or <em>"How do I dispose of lithium batteries?"</em>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Bottom Bar: Quick Audio Action & Google Translation Credit -->
+            <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+                <span id="voice-card-status" class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Ready to listen
+                </span>
+                <span class="text-[10px] text-emerald-400/80 flex items-center gap-1 font-medium">
+                    <i class="fa-solid fa-language text-xs"></i> Google Translation (EN • ಕನ್ನಡ • हिंदी)
+                </span>
+                <button type="button" onclick="stopEcoBotSpeaking()" id="btn-stop-speech" class="hidden text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-circle-stop"></i> Stop
+                </button>
+            </div>
+        </div>
+
+        <!-- The Floating Pill Bar -->
+        <div class="pointer-events-auto flex items-center gap-2 p-1.5 pl-2.5 pr-3 bg-slate-950/90 hover:bg-slate-950 text-white rounded-full border border-emerald-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-2xl transition-all duration-300 hover:border-emerald-400 group">
+            
+            <!-- Glowing Microphone Trigger Button -->
+            <button type="button" id="voice-pill-mic-btn" onclick="toggleEcoBotVoice()" class="relative w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 flex items-center justify-center font-bold shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95 transition-all">
+                <i class="fa-solid fa-microphone text-base" id="voice-mic-icon"></i>
+                <span id="voice-pulse-ring" class="hidden absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75"></span>
+            </button>
+
+            <!-- Sound Waveform Equalizer -->
+            <div class="flex items-center gap-1 px-1 h-6" id="voice-wave-visualizer" title="EcoBot Audio Visualizer">
+                <span class="voice-bar voice-bar-1"></span>
+                <span class="voice-bar voice-bar-2"></span>
+                <span class="voice-bar voice-bar-3"></span>
+                <span class="voice-bar voice-bar-4"></span>
+                <span class="voice-bar voice-bar-5"></span>
+            </div>
+
+            <!-- Pill Status / Question Trigger Text -->
+            <div onclick="toggleVoiceDialogueCard()" class="cursor-pointer flex flex-col justify-center max-w-[160px] sm:max-w-xs overflow-hidden">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-white tracking-tight flex items-center gap-1">
+                        <span>EcoBot Voice</span>
+                        <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-emerald-400"></i>
+                    </span>
+                    <span id="voice-status-pill" class="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded-full">Tap Mic</span>
+                </div>
+                <p id="voice-pill-caption" class="text-[11px] text-slate-300 truncate">Ask: "Which bins are full in DSU?"</p>
+            </div>
+
+            <!-- Language Switcher Pill (EN / ಕನ್ನಡ / हिंदी) -->
+            <div class="flex items-center p-0.5 bg-slate-900/90 rounded-full border border-slate-700/80 text-[10px] font-bold shrink-0">
+                <button type="button" onclick="setEcoBotLanguage('en')" id="pill-lang-en" class="px-1.5 py-0.5 rounded-full transition bg-emerald-500 text-slate-950 font-bold" title="English">EN</button>
+                <button type="button" onclick="setEcoBotLanguage('kn')" id="pill-lang-kn" class="px-1.5 py-0.5 rounded-full transition text-slate-400 hover:text-white" title="ಕನ್ನಡ (Kannada)">ಕನ್ನ</button>
+                <button type="button" onclick="setEcoBotLanguage('hi')" id="pill-lang-hi" class="px-1.5 py-0.5 rounded-full transition text-slate-400 hover:text-white" title="हिंदी (Hindi)">हिं</button>
+            </div>
+
+            <!-- Dynamic Quick Voice Chips (Visible on md+ screens) -->
+            <div id="voice-chips-container" class="hidden lg:flex items-center gap-1.5 pl-2 border-l border-slate-800">
+                <button type="button" onclick="triggerVoiceQuery('Which bins are full right now?')" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-emerald-950 hover:text-emerald-300 hover:border-emerald-500/50 border border-slate-700/60 text-slate-300 transition whitespace-nowrap">
+                    Full Bins?
+                </button>
+                <button type="button" onclick="triggerVoiceQuery('Where is the campus e-waste collection bin?')" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-emerald-950 hover:text-emerald-300 hover:border-emerald-500/50 border border-slate-700/60 text-slate-300 transition whitespace-nowrap">
+                    E-Waste?
+                </button>
+                <button type="button" onclick="triggerVoiceQuery('How does DSU handle food court waste?')" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-emerald-950 hover:text-emerald-300 hover:border-emerald-500/50 border border-slate-700/60 text-slate-300 transition whitespace-nowrap">
+                    Food Waste?
+                </button>
+            </div>
+
+            <!-- Transcript Toggle Chevron -->
+            <button type="button" onclick="toggleVoiceDialogueCard()" id="btn-toggle-transcript" class="w-8 h-8 rounded-full bg-slate-800/70 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition ml-1" title="Toggle Voice Dialogue">
+                <i class="fa-solid fa-chevron-up text-xs transition-transform duration-200" id="voice-chevron-icon"></i>
+            </button>
+        </div>
+    </div>
 
     <!-- Local Application Logic -->
     <script src="/static/js/app.js"></script>

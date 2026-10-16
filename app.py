@@ -16,7 +16,7 @@ import math
 import os
 from typing import Any, Dict, List
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory, Response
 import requests
 
 from ai_service import chat_with_ai, generate_daily_municipal_report, generate_llm_recommendations
@@ -102,6 +102,19 @@ def index():
 def presentation_slides():
     """Render the fullscreen interactive pitch deck presentation for hackathon judges."""
     return render_template("slides.html")
+
+
+@app.route("/codebase.pdf", methods=["GET"])
+@app.route("/download/codebase-pdf", methods=["GET"])
+def download_codebase_pdf():
+    """Serve the complete Python codebase as a downloadable publication-grade PDF."""
+    download_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "downloads")
+    filename = "DSU_EcoTwin_Complete_Codebase.pdf"
+    file_path = os.path.join(download_dir, filename)
+    if not os.path.exists(file_path):
+        from generate_pdf_codebase import build_codebase_pdf
+        build_codebase_pdf()
+    return send_from_directory(download_dir, filename, as_attachment=False)
 
 
 # ============================================================================
@@ -283,14 +296,37 @@ def api_ai_recommendations():
 
 @app.route("/api/ai/chat", methods=["POST"])
 def api_ai_chat():
-    """Chatbot assistant answering waste disposal and digital twin telemetry queries."""
+    """Chatbot assistant answering waste disposal and digital twin telemetry queries in EN/KN/HI."""
     data = request.get_json(silent=True) or {}
     message = data.get("message", "").strip()
+    language = data.get("language", "en").strip().lower()
     if not message:
         return jsonify({"error": "message is required"}), 400
 
-    result = chat_with_ai(message)
+    result = chat_with_ai(message, language=language)
     return jsonify(result)
+
+
+@app.route("/api/ai/translate", methods=["POST"])
+def api_ai_translate():
+    """Translate arbitrary text across English, Kannada ('kn'), and Hindi ('hi') via Google Translation."""
+    from ai_service import google_translate_text
+    data = request.get_json(silent=True) or {}
+    text = data.get("text", "").strip()
+    target_lang = data.get("target_lang", "en").strip().lower()
+    source_lang = data.get("source_lang", "auto").strip().lower()
+
+    if not text:
+        return jsonify({"error": "text is required"}), 400
+
+    translated = google_translate_text(text, target_lang=target_lang, source_lang=source_lang)
+    return jsonify({
+        "original_text": text,
+        "translated_text": translated,
+        "target_lang": target_lang,
+        "source_lang": source_lang,
+        "provider": "Google Neural Translation"
+    })
 
 
 @app.route("/api/ai/generate-report", methods=["GET"])
@@ -298,6 +334,78 @@ def api_ai_generate_report():
     """Generate formal daily municipality executive summary report."""
     report = generate_daily_municipal_report()
     return jsonify(report)
+
+
+@app.route("/api/reports/export-csv", methods=["GET"])
+def api_export_report_csv():
+    """Export the executive daily report & smart bin telemetry as a clean downloadable CSV file."""
+    import csv
+    from datetime import datetime
+    import io
+
+    report = generate_daily_municipal_report()
+    bins = get_all_smart_bins()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Document Header
+    writer.writerow(["DAYANANDA SAGAR UNIVERSITY (DSU) - HAROHALLI CAMPUS"])
+    writer.writerow(["EXECUTIVE DAILY MUNICIPAL & CAMPUS SOLID WASTE MANAGEMENT REPORT"])
+    writer.writerow(["Report ID", report.get("report_id", "DSU-REP-01")])
+    writer.writerow(["Date", report.get("date", "")])
+    writer.writerow(["Generated At", report.get("generated_at", "")])
+    writer.writerow(["Jurisdiction", report.get("city_jurisdiction", "")])
+    writer.writerow([])
+
+    # Executive Summary Narrative
+    writer.writerow(["EXECUTIVE SUMMARY"])
+    writer.writerow([report.get("executive_summary", "")])
+    writer.writerow([])
+
+    # Key Performance Metrics
+    writer.writerow(["EXECUTIVE KEY PERFORMANCE INDICATORS (KPIs)"])
+    writer.writerow(["Metric", "Value"])
+    kpi = report.get("kpi_metrics", {})
+    for k, v in kpi.items():
+        writer.writerow([k.replace("_", " ").title(), v])
+    writer.writerow([])
+
+    # Fleet Efficiency
+    writer.writerow(["CAMPUS EV FLEET EFFICIENCY"])
+    fleet = report.get("fleet_efficiency", {})
+    for k, v in fleet.items():
+        writer.writerow([k.replace("_", " ").title(), v])
+    writer.writerow([])
+
+    # Smart Bins Inventory Table
+    writer.writerow(["CAMPUS SMART BINS TELEMETRY & INVENTORY"])
+    writer.writerow(["Bin Code", "Landmark / Building", "Campus Zone", "Fill Level (%)", "Gas Concentration (PPM)", "Current Weight (kg)", "Battery (%)", "Operational Status"])
+    for b in bins:
+        writer.writerow([
+            b["bin_code"],
+            b["name"],
+            b["area"],
+            f"{b['fill_level']}%",
+            b["gas_ppm"],
+            b["weight_kg"],
+            f"{b['battery_pct']}%",
+            b["status"]
+        ])
+    writer.writerow([])
+
+    # Hotspot Warnings
+    writer.writerow(["CRITICAL HOTSPOTS & DISPATCH ADVICE"])
+    for warning in report.get("hotspot_warnings", []):
+        writer.writerow([warning])
+
+    output.seek(0)
+    filename = f"DSU_Executive_Waste_Report_{datetime.now().strftime('%Y%m%d')}.csv"
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 
 # ============================================================================
@@ -315,11 +423,11 @@ def api_submit_waste_report():
     """Citizen incident reporting for overflowing bins or illegal dumping."""
     data = request.get_json(silent=True) or {}
 
-    reporter_name = data.get("reporter_name", "Concerned Citizen")
+    reporter_name = data.get("reporter_name", "DSU Student / Faculty")
     issue_type = data.get("issue_type", "Overflowing Bin")
-    location_address = data.get("location_address", "Public Area")
-    lat = float(data.get("lat", 12.9716))
-    lon = float(data.get("lon", 77.5946))
+    location_address = data.get("location_address", "Dayananda Sagar University Campus, Harohalli")
+    lat = float(data.get("lat", 12.65954))
+    lon = float(data.get("lon", 77.45077))
     description = data.get("description", "")
     phone = data.get("phone", "")
     image_data = data.get("image_data", "")
@@ -434,12 +542,14 @@ def api_nearby_bins():
             continue
 
     if resp is None or resp.status_code != 200:
-        # Fallback to local municipal waste collection points around user coordinates
+        # Fallback to DSU Harohalli Campus and Harohalli municipal waste collection points
         fallback_bins = [
-            {"name": "Community Recycling Station", "lat": lat + 0.0025, "lon": lon + 0.0031, "type": "recycling"},
-            {"name": "Municipal Green Waste Basket", "lat": lat - 0.0018, "lon": lon + 0.0022, "type": "waste_basket"},
-            {"name": "Eco-Hub Plastic & Paper Dropoff", "lat": lat + 0.0041, "lon": lon - 0.0028, "type": "recycling"},
-            {"name": "Civic Center Public Bin", "lat": lat - 0.0032, "lon": lon - 0.0019, "type": "waste_basket"},
+            {"name": "DSU Central Food Court Waste & Compost Hub", "lat": 12.6598, "lon": 77.4516, "type": "wet_and_dry", "location": "DSU Harohalli Campus"},
+            {"name": "School of Engineering (SOE) E-Waste Dropoff", "lat": 12.6608, "lon": 77.4503, "type": "e_waste", "location": "DSU Harohalli Campus"},
+            {"name": "DSU Campus Bio-Composting Yard (North Gate)", "lat": 12.6622, "lon": 77.4510, "type": "compost_facility", "location": "DSU Harohalli Campus"},
+            {"name": "DSU Main Gate Segregation Station (Kanakapura Rd)", "lat": 12.6586, "lon": 77.4468, "type": "waste_basket", "location": "DSU Main Gate"},
+            {"name": "Harohalli Industrial Area Recycling Depot", "lat": 12.6550, "lon": 77.4420, "type": "recycling_depot", "location": "Harohalli Industrial Area, Kanakapura Rd"},
+            {"name": "Harohalli Town Waste Processing Center", "lat": 12.6480, "lon": 77.4380, "type": "municipal_center", "location": "Harohalli Town"},
         ]
         results = []
         for b in fallback_bins:
@@ -449,7 +559,9 @@ def api_nearby_bins():
                 "lat": b["lat"],
                 "lon": b["lon"],
                 "type": b["type"],
+                "location": b["location"],
                 "distance_m": dist,
+                "google_maps_url": f"https://www.google.com/maps/dir/?api=1&destination={b['lat']},{b['lon']}",
             })
         results.sort(key=lambda item: item["distance_m"])
         return jsonify(results)

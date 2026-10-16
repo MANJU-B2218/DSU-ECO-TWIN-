@@ -273,7 +273,7 @@ def create_presentation(output_path="EcoTwin_Hackathon_Presentation.pptx"):
     points_sr = [
         ("Solves Visual Ambiguity:", "When webcam lighting is bad, users can tap quick pills or search brand names (e.g. 'Bisleri water bottle', 'Duracell AA battery', 'Banana peel')."),
         ("Live Web Knowledge Retrieval:", "Queries live web search engines to fetch recycling snippets, civic regulations, and scientific decomposition properties in real-time."),
-        ("1-Tap Google Lens Verification:", "Includes a direct Google Lens submission button for visual verification alongside live search citation links."),
+        ("1-Tap Web Search Verification:", "Includes direct Google Search query citation links for instant verification of disposal instructions."),
         ("Verified 100% Accuracy on Key Items:", "Tested across common commercial items with live citations displayed in the interactive result card."),
     ]
     for h, b in points_sr:
