@@ -40,7 +40,12 @@ from predict import detect_object_via_search, load_model, predict_image
 # App setup
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+if not os.path.isdir(TEMPLATES_DIR):
+    TEMPLATES_DIR = os.path.join(os.path.dirname(BASE_DIR), "templates")
+
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+if not os.path.isdir(STATIC_DIR):
+    STATIC_DIR = os.path.join(os.path.dirname(BASE_DIR), "static")
 
 app = Flask(
     __name__,
@@ -59,7 +64,8 @@ def before_first_request_hook() -> None:
     global _db_initialized
     if not _db_initialized:
         init_db()
-        twin_engine.start_background_simulation()
+        if not os.environ.get("VERCEL"):
+            twin_engine.start_background_simulation()
         _db_initialized = True
 
 
