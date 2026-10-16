@@ -22,20 +22,27 @@ import urllib.parse
 from bs4 import BeautifulSoup
 from PIL import Image
 import requests
-import torch
-import torch.nn as nn
-import torchvision.models as models
+
+try:
+    import torch
+    import torch.nn as nn
+    import torchvision.models as models
+    _TORCH_AVAILABLE = True
+    _DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+except ImportError:
+    torch = None
+    nn = None
+    models = None
+    _TORCH_AVAILABLE = False
+    _DEVICE = "cpu"
 
 # Base paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "model")
 os.makedirs(MODEL_DIR, exist_ok=True)
 
-# Device Configuration
-_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 # Global Cached Vision Model & Categories
-_CACHED_MODEL: Optional[nn.Module] = None
+_CACHED_MODEL: Optional[Any] = None
 _CACHED_TRANSFORMS: Optional[Any] = None
 _CACHED_CATEGORIES: Optional[List[str]] = None
 
@@ -147,9 +154,12 @@ EWASTE_KEYWORDS = [
 ]
 
 
-def load_model() -> Tuple[nn.Module, Any, List[str]]:
+def load_model() -> Tuple[Any, Any, List[str]]:
     """Load or return the cached pre-trained MobileNetV3 Large vision model."""
     global _CACHED_MODEL, _CACHED_TRANSFORMS, _CACHED_CATEGORIES
+
+    if not _TORCH_AVAILABLE:
+        return None, None, []
 
     if _CACHED_MODEL is not None:
         return _CACHED_MODEL, _CACHED_TRANSFORMS, _CACHED_CATEGORIES
@@ -417,6 +427,9 @@ def _predict_direct(image_bytes: bytes) -> Dict[str, Any]:
 
     # 2. Local Deep Learning Vision (MobileNetV3 with 1,000 Real-World Classes)
     model, transform, categories = load_model()
+    if not model or not transform or not categories:
+        return detect_object_via_search("Plastic Recyclable Water Bottle")
+
     tensor = transform(image).unsqueeze(0).to(_DEVICE)
 
     with torch.no_grad():

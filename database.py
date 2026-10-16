@@ -14,14 +14,143 @@ import os
 import sqlite3
 from typing import Any, Dict, List, Optional
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ecowaste.db")
+if os.environ.get("VERCEL"):
+    DB_PATH = "/tmp/ecowaste.db"
+else:
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ecowaste.db")
 
 
 def get_db_connection() -> sqlite3.Connection:
     """Create and return a SQLite database connection with row factory enabled."""
+    needs_init = not os.path.exists(DB_PATH)
     conn = sqlite3.connect(DB_PATH, timeout=20.0)
     conn.row_factory = sqlite3.Row
+    if needs_init:
+        init_db_with_conn(conn)
     return conn
+
+
+def init_db_with_conn(conn: sqlite3.Connection) -> None:
+    """Initialize database tables on a specific connection."""
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS scans (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL DEFAULT 'anonymous',
+            item_name TEXT DEFAULT 'General Waste Item',
+            predicted_class TEXT NOT NULL,
+            bio_group TEXT NOT NULL,
+            bin_category TEXT DEFAULT 'Dry Waste Bin',
+            confidence REAL NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+            comment TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS smart_bins (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bin_code TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            area TEXT NOT NULL,
+            lat REAL NOT NULL,
+            lon REAL NOT NULL,
+            fill_level REAL NOT NULL DEFAULT 0.0,
+            gas_ppm REAL NOT NULL DEFAULT 40.0,
+            weight_kg REAL NOT NULL DEFAULT 0.0,
+            battery_pct REAL NOT NULL DEFAULT 100.0,
+            status TEXT NOT NULL DEFAULT 'Normal',
+            last_collected DATETIME DEFAULT CURRENT_TIMESTAMP,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS collection_trucks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            truck_code TEXT UNIQUE NOT NULL,
+            driver_name TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'En Route',
+            current_lat REAL NOT NULL,
+            current_lon REAL NOT NULL,
+            capacity_kg REAL NOT NULL DEFAULT 500.0,
+            current_load_kg REAL NOT NULL DEFAULT 0.0,
+            last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS citizen_reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            reporter_name TEXT NOT NULL,
+            issue_type TEXT NOT NULL,
+            location_address TEXT NOT NULL,
+            lat REAL NOT NULL,
+            lon REAL NOT NULL,
+            description TEXT NOT NULL,
+            phone TEXT DEFAULT '',
+            image_data TEXT DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'Pending',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+    )
+    conn.commit()
+    seed_dsu_bins_and_trucks_with_conn(conn)
+
+
+def seed_dsu_bins_and_trucks_with_conn(conn: sqlite3.Connection) -> None:
+    """Seed initial smart bins and electric haulers for DSU Harohalli Campus."""
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM smart_bins")
+    if cursor.fetchone()[0] == 0:
+        dsu_bins = [
+            ("BIN-DSU-01", "DSU Main Campus Gate (Kanakapura Rd)", "Campus Entrance & Transit", 12.6586, 77.4468, 72.0, 110.0, 38.5, 92.0, "Normal"),
+            ("BIN-DSU-02", "School of Engineering (SOE) Quadrangle", "Academic Block 1", 12.6608, 77.4503, 84.0, 395.0, 48.2, 88.0, "Attention"),
+            ("BIN-DSU-03", "Central Student Food Court & Cafeteria", "Student Amenities Hub", 12.6598, 77.4516, 91.0, 420.0, 62.0, 79.0, "Critical"),
+            ("BIN-DSU-04", "School of Health Sciences & Nursing", "Medical Campus", 12.6615, 77.4495, 45.0, 85.0, 22.0, 95.0, "Normal"),
+            ("BIN-DSU-05", "Hostel Quadrangle (Blocks A & B)", "Residential Zone", 12.6625, 77.4522, 86.0, 380.0, 54.0, 84.0, "Attention"),
+            ("BIN-DSU-06", "Innovation & Robotics Incubation Lab", "Research & Tech Wing", 12.6602, 77.4488, 30.0, 60.0, 14.5, 98.0, "Normal"),
+            ("BIN-DSU-07", "DSU Central Library & Admin Tower", "Academic Zone", 12.6592, 77.4500, 68.0, 140.0, 31.0, 90.0, "Normal"),
+            ("BIN-DSU-08", "Campus Sports Complex & Arena", "Athletic Grounds", 12.6630, 77.4480, 55.0, 95.0, 26.0, 91.0, "Normal"),
+        ]
+        cursor.executemany(
+            """
+            INSERT OR IGNORE INTO smart_bins (bin_code, name, area, lat, lon, fill_level, gas_ppm, weight_kg, battery_pct, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            dsu_bins,
+        )
+
+    cursor.execute("SELECT COUNT(*) FROM collection_trucks")
+    if cursor.fetchone()[0] == 0:
+        dsu_trucks = [
+            ("DSU-EV-01", "Basavaraju (Electric Buggy)", "En Route", 12.6590, 77.4480, 300.0, 185.0),
+            ("DSU-EV-02", "Manjunath (Campus Hauler)", "En Route", 12.6610, 77.4510, 350.0, 210.0),
+            ("DSU-EV-03", "Shivakumar (Facility Utility)", "Idle", 12.6580, 77.4460, 250.0, 45.0),
+        ]
+        cursor.executemany(
+            """
+            INSERT OR IGNORE INTO collection_trucks (truck_code, driver_name, status, current_lat, current_lon, capacity_kg, current_load_kg)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            dsu_trucks,
+        )
+    conn.commit()
 
 
 def init_db() -> None:
