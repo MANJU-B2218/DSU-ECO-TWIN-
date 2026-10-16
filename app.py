@@ -39,23 +39,40 @@ from predict import detect_object_via_search, load_model, predict_image
 
 # App setup
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
-if not os.path.isdir(TEMPLATES_DIR):
-    TEMPLATES_DIR = os.path.join(os.path.dirname(BASE_DIR), "templates")
 
-STATIC_DIR = os.path.join(BASE_DIR, "static")
-if not os.path.isdir(STATIC_DIR):
-    STATIC_DIR = os.path.join(os.path.dirname(BASE_DIR), "static")
+
+def _find_dir(dir_name: str) -> str:
+    candidates = [
+        os.path.join(BASE_DIR, dir_name),
+        os.path.join(os.getcwd(), dir_name),
+        os.path.join(os.path.dirname(BASE_DIR), dir_name),
+        os.path.join("/var/task", dir_name),
+    ]
+    for c in candidates:
+        if os.path.isdir(c):
+            return c
+    return os.path.join(BASE_DIR, dir_name)
+
+
+TEMPLATES_DIR = _find_dir("templates")
+STATIC_DIR = _find_dir("static")
 
 app = Flask(
     __name__,
     template_folder=TEMPLATES_DIR,
     static_folder=STATIC_DIR,
+    static_url_path="/static",
 )
 
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # 32 MB max
 
 _db_initialized = False
+
+
+@app.route("/static/<path:filename>")
+def serve_custom_static(filename: str):
+    """Explicitly serve static files for Vercel serverless."""
+    return send_from_directory(STATIC_DIR, filename)
 
 
 @app.before_request

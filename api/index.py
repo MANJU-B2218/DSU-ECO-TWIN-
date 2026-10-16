@@ -15,5 +15,6 @@ try:
 except Exception as err:
     print(f"[WARN] Vercel serverless init_db notice: {err}")
 
-# Vercel Python runtime entrypoint
+# Vercel Python runtime entrypoints (supports both 'app' and 'handler' WSGI signatures)
 handler = app
+app = app
