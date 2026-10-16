@@ -7,3 +7,5 @@ venv/
 env/
 cloudflared.exe
 *.log
+*.db
+*.sqlite3
