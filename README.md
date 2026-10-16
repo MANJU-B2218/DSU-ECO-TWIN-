@@ -1,6 +1,6 @@
 # DSU EcoTwin - Dayananda Sagar University Smart Waste Digital Twin 🌍♻️
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Online-emerald?style=for-the-badge&logo=cloudflare)](https://mother-towers-academics-casino.trycloudflare.com)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Online-emerald?style=for-the-badge&logo=cloudflare)](https://dsu-eco-twin-3twk.vercel.app/)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge&logo=github)](https://github.com/MANJU-B2218/DSU-ECO-TWIN-.git)
 [![Location](https://img.shields.io/badge/Campus-DSU%20Harohalli%20(12.65954%2C%2077.45077)-orange?style=for-the-badge&logo=google-maps)](https://www.google.com/maps/search/?api=1&query=12.65954,77.45077)
 
@@ -8,10 +8,10 @@ A production-grade Smart Waste Management Digital Twin and AI civic ecosystem ta
 
 ---
 
-## 🌐 Live Access Links
-* **Live Web App**: [https://mother-towers-academics-casino.trycloudflare.com](https://mother-towers-academics-casino.trycloudflare.com)
+## 🌐 Live permanent Access Links
+* **Live Web App**:https://dsu-eco-twin-3twk.vercel.app/
 * **GitHub Repository**: [https://github.com/MANJU-B2218/DSU-ECO-TWIN-.git](https://github.com/MANJU-B2218/DSU-ECO-TWIN-.git)
-* **Executive CSV Telemetry Export**: `/api/reports/export-csv`
+* **Executive CSV Telemetry Export**:  https://dsu-eco-twin-3twk.vercel.app/api/reports/export-csv
 * **Complete Codebase PDF**: `/codebase.pdf`
 * **Interactive Pitch Deck**: `/slides`
 
@@ -95,5 +95,5 @@ http://127.0.0.1:8000
 ```
 Or view the live cloud deployment:
 ```
-https://mother-towers-academics-casino.trycloudflare.com
+https://dsu-eco-twin-3twk.vercel.app/
 ```
