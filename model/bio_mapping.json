@@ -1,0 +1,9 @@
+{
+  "plastic": "Non-bio-degradable",
+  "paper": "Bio-degradable",
+  "metal": "Non-bio-degradable",
+  "glass": "Non-bio-degradable",
+  "organic": "Bio-degradable",
+  "e-waste": "Non-bio-degradable",
+  "cardboard": "Bio-degradable"
+}
